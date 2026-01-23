@@ -1,0 +1,12 @@
+# PHP Configuration for large file uploads
+php_value upload_max_filesize 300M
+php_value post_max_size 300M
+php_value max_execution_time 1200
+php_value max_input_time 1200
+php_value memory_limit 1024M
+
+# Laravel rewrite rules
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

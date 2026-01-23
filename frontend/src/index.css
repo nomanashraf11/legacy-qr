@@ -1,0 +1,265 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: black;
+    color: white;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.light-theme {
+    background-color: white;
+    color: black;
+}
+
+.dark-theme {
+    background-color: black;
+    color: white;
+}
+.light-theme .rsd__select-day,
+.light-theme .rsd__select-month,
+.light-theme .rsd__select-year {
+    background-color: #f0f0f0;
+    color: black;
+    border: 1px solid #00000040;
+}
+@font-face {
+    font-family: "Roboto";
+    font-weight: 300;
+    src: url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,300&display=swap");
+}
+
+@font-face {
+    font-family: "Lora";
+    font-weight: 300;
+    src: url("https://fonts.googleapis.com/css2?family=Lora&display=swap");
+}
+
+/* React Select Picker */
+
+.rsd__react-select-datepicker {
+    display: flex;
+    flex: 1;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Christmas modal specific styling */
+.ChristmasModal input,
+.ChristmasModal textarea {
+    color: #111827 !important;
+    background-color: white !important;
+}
+
+.ChristmasModal input::placeholder,
+.ChristmasModal textarea::placeholder {
+    color: #6b7280 !important;
+}
+
+.rsd__select-container-day,
+.rsd__select-container-month,
+.rsd__select-container-year {
+    display: flex;
+    flex: 1;
+    border: 1px solid #ffffff40;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.rsd__select-day,
+.rsd__select-month,
+.rsd__select-year {
+    background-color: #333333;
+    padding: 10px;
+    font-size: 16px;
+    outline: none;
+    color: white;
+    border-right: 8px solid transparent;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.gm-style-cc {
+    display: none !important;
+}
+
+img[src=""] {
+    display: none !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(80%);
+    width: 20px;
+    height: 20px;
+}
+
+.single-thumb .range-slider__thumb[data-lower] {
+    width: 0;
+}
+
+.single-thumb .range-slider__range {
+    border-radius: 6px;
+}
+
+/* Christmas Dot Pattern Background */
+.bg-dot-pattern {
+    background-image: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.1) 1px,
+        transparent 1px
+    );
+    background-size: 20px 20px;
+}
+
+#tree text {
+    pointer-events: none !important;
+}
+.parent_node {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto; /* Enables scrolling on mobile */
+    white-space: nowrap; /* Prevents wrapping */
+}
+.paternal {
+    display: flex;
+    width: 400px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto; /* Enables scrolling on mobile */
+    white-space: nowrap;
+}
+.node {
+    /*border-top: 1px solid #626262;*/
+    display: inline-block;
+    padding: 20px;
+    text-align: center;
+    /*border-radius: 12px;*/
+    width: 200px;
+}
+.line {
+    position: relative;
+}
+
+.line::before {
+    content: "";
+    position: absolute;
+    width: 1px; /* Make it a thin vertical line */
+    height: 2rem; /* Adjust height for vertical length */
+    /* Center horizontally */
+    top: -8%; /* Adjust starting position */
+    background-color: #999696;
+    transform: translateX(-50%); /* Center the line */
+}
+
+.line.hide-before::before {
+    content: none;
+}
+.self-node {
+    border: 0px solid #999696;
+}
+
+.line-horizontal {
+    position: relative;
+}
+
+.line-horizontal::before {
+    content: "";
+    position: absolute;
+    width: 6rem; /* Adjust width for horizontal length */
+    height: 1px; /* Make it a thin horizontal line */
+    /* Center vertically */
+    right: 41%; /* Move it to the center */
+    bottom: 25%; /* Adjust vertical position */
+    background-color: #999696;
+    transform: translate(-50%, -50%); /* Center the line */
+}
+
+@media (max-width: 768px) {
+    /* Adjust breakpoint as needed */
+    .line-horizontal::before {
+        width: 3rem;
+        right: 44%;
+        /* Reduce the width for small screens */
+    }
+}
+.self-node {
+    border: 0px solid #b4b4b4;
+}
+
+.node img {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    margin: auto;
+    object-fit: cover;
+    border: 1px solid #ffffff30;
+}
+
+.node p {
+    color: #afafaf;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+.self-node p {
+    font-size: 16px;
+    color: #afafaf;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.node span {
+    display: block;
+    font-size: 13px;
+    color: #868686;
+}
+
+.ewcqji {
+    width: 100% !important;
+    margin: 0 !important;
+    font-family: inherit !important;
+}
+
+.ewcqji > div {
+    border-radius: 50px !important;
+    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: unset !important;
+    border: 1px solid #ffffff10 !important;
+    transition: all 200ms ease-in-out;
+    font-family: inherit !important;
+    position: relative;
+}
+
+.ewcqji > div:hover {
+    background-color: #222222 !important;
+}
+
+.ewcqji > div:active {
+    transform: scale(0.95);
+}
+
+.ewcqji > div > div > span {
+    font-family: inherit !important;
+    font-weight: 500 !important;
+    margin-left: 12px;
+}
+
+.ewcqji > div > div > svg {
+    position: absolute;
+    left: 28.5%;
+}

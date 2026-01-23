@@ -1,0 +1,15 @@
+# Terraform Variables File Template
+
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is in .gitignore to protect your secrets
+
+aws_region        = "us-east-1"              # AWS region
+environment       = "staging"                 # Environment name (staging/production)
+instance_type     = "t4g.nano"               # EC2 instance type
+db_instance_class = "db.t3.micro"            # RDS instance class
+db_name           = "livinglegacyqr"         # Database name
+db_username       = "admin"                  # Database username
+db_password       = "CHANGE_THIS_PASSWORD"   # Database password (min 8 chars)
+key_pair_name     = "your-key-pair-name"     # EC2 Key Pair name
+allowed_cidr      = "0.0.0.0/0"              # CIDR block (use your IP for security)
+s3_bucket_name    = "living-legacy-qr-staging"  # S3 bucket name
