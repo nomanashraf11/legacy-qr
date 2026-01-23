@@ -38,7 +38,7 @@ variable "environment" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t4g.nano"
+  default     = "t3.micro"  # Free Tier eligible
 }
 
 variable "db_instance_class" {
