@@ -1,0 +1,12 @@
+ALTER TABLE `admins` ADD `tawk` BOOLEAN NOT NULL DEFAULT FALSE AFTER `reviews_link`;
+
+---
+
+Arsalan created migrations
+
+
+
+-----------------------------------------------------------------------------------
+
+
+Delete column deleted at in users_table

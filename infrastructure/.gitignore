@@ -1,0 +1,28 @@
+# .gitignore additions for Infrastructure as Code
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars.backup
+.terraform.tfstate.lock.info
+
+# CloudFormation
+cloudformation-outputs.json
+*-parameters.json
+
+# AWS credentials (if stored locally)
+.aws/
+aws-credentials.txt
+
+# SSH keys
+*.pem
+*.ppk
+*.key
+!public_keys/
+
+# Environment files with secrets
+.env.production
+.env.staging.local

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+
+        <script>
+            // Check if this is a Christmas page
+            const isChristmas =
+                window.location.pathname.includes("/christmas") &&
+                window.location.search.includes("v=christmas");
+
+            if (isChristmas) {
+                // Set Christmas meta tags
+                document.title = "🎄 Preserving Memories | Living Legacy";
+
+                document
+                    .querySelector('meta[property="og:title"]')
+                    .setAttribute(
+                        "content",
+                        "🎄 Preserving Memories | Living Legacy"
+                    );
+                document
+                    .querySelector('meta[property="og:description"]')
+                    .setAttribute(
+                        "content",
+                        "🎄 Preserving memories and celebrating special moments with family and friends. Living Legacy - Create lasting memories together."
+                    );
+                document
+                    .querySelector('meta[property="og:site_name"]')
+                    .setAttribute("content", "Living Legacy");
+            }
+        </script>
+
+        <meta
+            content="Preserving memories and celebrating special moments with family and friends. Living Legacy - Create lasting memories together."
+            name="description"
+        />
+        <meta
+            property="og:image"
+            content="https://res.cloudinary.com/djjd5w5dw/image/upload/v1757955293/logocentered_e0clto.png"
+        />
+        <meta
+            content="preserving memories, family moments, living legacy, memory sharing, family photos, special moments, tribute page, memorial"
+            name="keywords"
+        />
+        <meta
+            http-equiv="Cache-Control"
+            content="no-cache, no-store, must-revalidate"
+        />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+        <meta
+            content="Preserving Memories | Living Legacy"
+            property="og:title"
+        />
+        <meta
+            content="Preserving Memories | Living Legacy"
+            property="og:title"
+        />
+        <meta content="Living Legacy" property="og:site_name" />
+
+        <link href="/assets/logo-DtdHLi60.png" rel="icon" type="image/png" />
+        <meta href="/public/logo.png" name="apple-touch-icon" />
+        <title>Preserving Memories | Living Legacy</title>
+      <script type="module" crossorigin src="/assets/index-DFsgRAHP.js"></script>
+      <link rel="stylesheet" crossorigin href="/assets/index-CEjz_zhA.css">
+    </head>
+
+    <body>
+        <div id="root"></div>
+        <script
+            src="https://accounts.google.com/gsi/client"
+            async
+            defer
+        ></script>
+        <script>
+            const global = window;
+        </script>
+    </body>
+</html>
