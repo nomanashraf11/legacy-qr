@@ -22,9 +22,26 @@ class AddLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|min:2',
-            'number' => 'required|numeric|min:1',
-            'version_type' => 'nullable|in:full,christmas',
+            'name' => 'required|string|max:255',
+            'number' => 'required|integer|min:1',
+            'version_type' => 'required|in:full,christmas',
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Batch name is required.',
+            'number.required' => 'Number of QR codes is required.',
+            'number.integer' => 'Number must be an integer.',
+            'number.min' => 'Number must be at least 1.',
+            'version_type.required' => 'Version type is required.',
+            'version_type.in' => 'Version type must be either full or christmas.',
         ];
     }
 }

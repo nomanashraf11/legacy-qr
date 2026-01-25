@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckUserBannedApi
 {
@@ -16,13 +16,13 @@ class CheckUserBannedApi
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::user()->isBanned == 1) {
-            $request->user()->tokens()->delete();
+        if (Auth::check() && Auth::user()->is_banned) {
             return response()->json([
                 'status' => 403,
-                'message' => 'Your account has been banned. Please contact support for assistance.'
-            ]);
+                'message' => 'Your account has been banned.'
+            ], 403);
         }
+
         return $next($request);
     }
 }

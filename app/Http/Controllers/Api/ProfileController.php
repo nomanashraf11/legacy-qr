@@ -63,7 +63,9 @@ class ProfileController extends Controller
                 'status' => '422',
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
-            ]);
+            ], 422)->header('Access-Control-Allow-Origin', '*')
+                    ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+                    ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
         }
         try {
             DB::beginTransaction();
@@ -78,12 +80,44 @@ class ProfileController extends Controller
                     if ($request->hasFile('profile_picture')) {
                         $profilePicture = $request->file('profile_picture');
                         $profilePictureName = time().'_'.$profilePicture->getClientOriginalName();
-                        Storage::disk('public')->putFileAs('images/profile/profile_pictures', $profilePicture, $profilePictureName);
+                        try {
+                            $disk = config('filesystems.default');
+                            $path = Storage::disk($disk)->putFileAs('images/profile/profile_pictures', $profilePicture, $profilePictureName);
+                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
+                            \Log::info('Profile picture uploaded to ' . $disk, ['path' => $path]);
+                        } catch (\Exception $e) {
+                            \Log::error('S3 upload failed, using local storage', [
+                                'error' => $e->getMessage(),
+                                'disk' => config('filesystems.default')
+                            ]);
+                            // Fallback to local storage
+                            $localDir = public_path('images/profile/profile_pictures');
+                            if (!file_exists($localDir)) {
+                                mkdir($localDir, 0777, true);
+                            }
+                            $profilePicture->move($localDir, $profilePictureName);
+                        }
                     }
                     if ($request->hasFile('cover_picture')) {
                         $coverPicture = $request->file('cover_picture');
                         $coverPictureName = time().'_'.$coverPicture->getClientOriginalName();
-                        Storage::disk('public')->putFileAs('images/profile/cover_pictures', $coverPicture, $coverPictureName);
+                        try {
+                            $disk = config('filesystems.default');
+                            $path = Storage::disk($disk)->putFileAs('images/profile/cover_pictures', $coverPicture, $coverPictureName);
+                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
+                            \Log::info('Cover picture uploaded to ' . $disk, ['path' => $path]);
+                        } catch (\Exception $e) {
+                            \Log::error('S3 upload failed, using local storage', [
+                                'error' => $e->getMessage(),
+                                'disk' => config('filesystems.default')
+                            ]);
+                            // Fallback to local storage
+                            $localDir = public_path('images/profile/cover_pictures');
+                            if (!file_exists($localDir)) {
+                                mkdir($localDir, 0777, true);
+                            }
+                            $coverPicture->move($localDir, $coverPictureName);
+                        }
                     }
 
                     $link->profile->update([
@@ -142,16 +176,44 @@ class ProfileController extends Controller
                     if ($request->hasFile('profile_picture')) {
                         $profilePicture = $request->file('profile_picture');
                         $profilePictureName = time().'_'.$profilePicture->getClientOriginalName();
-                        // Use S3 if configured, otherwise fallback to public disk
-                        $disk = env('FILESYSTEM_DISK', 'public') === 's3' ? 's3' : 'public';
-                        Storage::disk($disk)->putFileAs('images/profile/profile_pictures', $profilePicture, $profilePictureName);
+                        try {
+                            $disk = config('filesystems.default');
+                            $path = Storage::disk($disk)->putFileAs('images/profile/profile_pictures', $profilePicture, $profilePictureName);
+                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
+                            \Log::info('Profile picture uploaded to ' . $disk, ['path' => $path]);
+                        } catch (\Exception $e) {
+                            \Log::error('S3 upload failed, using local storage', [
+                                'error' => $e->getMessage(),
+                                'disk' => config('filesystems.default')
+                            ]);
+                            // Fallback to local storage
+                            $localDir = public_path('images/profile/profile_pictures');
+                            if (!file_exists($localDir)) {
+                                mkdir($localDir, 0777, true);
+                            }
+                            $profilePicture->move($localDir, $profilePictureName);
+                        }
                     }
                     if ($request->hasFile('cover_picture')) {
                         $coverPicture = $request->file('cover_picture');
                         $coverPictureName = time().'_'.$coverPicture->getClientOriginalName();
-                        // Use S3 if configured, otherwise fallback to public disk
-                        $disk = env('FILESYSTEM_DISK', 'public') === 's3' ? 's3' : 'public';
-                        Storage::disk($disk)->putFileAs('images/profile/cover_pictures', $coverPicture, $coverPictureName);
+                        try {
+                            $disk = config('filesystems.default');
+                            $path = Storage::disk($disk)->putFileAs('images/profile/cover_pictures', $coverPicture, $coverPictureName);
+                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
+                            \Log::info('Cover picture uploaded to ' . $disk, ['path' => $path]);
+                        } catch (\Exception $e) {
+                            \Log::error('S3 upload failed, using local storage', [
+                                'error' => $e->getMessage(),
+                                'disk' => config('filesystems.default')
+                            ]);
+                            // Fallback to local storage
+                            $localDir = public_path('images/profile/cover_pictures');
+                            if (!file_exists($localDir)) {
+                                mkdir($localDir, 0777, true);
+                            }
+                            $coverPicture->move($localDir, $coverPictureName);
+                        }
                     }
                     $profile = Profile::create([
                         'uuid' => Str::uuid(),
@@ -213,10 +275,16 @@ class ProfileController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollback();
+            \Log::error('addBio error: ' . $th->getMessage(), [
+                'exception' => $th,
+                'trace' => $th->getTraceAsString()
+            ]);
             return response()->json([
                 'status' => 500,
                 'message' => $th->getMessage(),
-            ]);
+            ], 500)->header('Access-Control-Allow-Origin', '*')
+                    ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+                    ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
         }
     }
 
@@ -227,7 +295,8 @@ class ProfileController extends Controller
                 $image = $request->file('image');
                 $extension = $image->getClientOriginalExtension();
                 $imageName = time().'_'.Str::random(10).'.'.$extension;
-                Storage::disk('public')->putFileAs('images/profile/relations', $image, $imageName);
+                Storage::disk(config('filesystems.default'))->putFileAs('images/profile/relations', $image, $imageName);
+                
 
 
 
@@ -360,14 +429,13 @@ class ProfileController extends Controller
                 $extension = $image->getClientOriginalExtension();
                 $imageName = time().'_'.Str::random(10).'.'.$extension;
 
-                // Use S3 if configured, otherwise fallback to default disk
-                $disk = env('FILESYSTEM_DISK', 'local') === 's3' ? 's3' : 'local';
-                
                 if (strpos($image->getMimeType(), 'image') !== false) {
-                    Storage::disk($disk)->putFileAs('images/profile/photos', $image, $imageName);
+                    $path = Storage::disk(config('filesystems.default'))->putFileAs('images/profile/photos', $image, $imageName);
+                    
                 } else {
                     $imageName = time().'_'.Str::random(10).'.mp4';
-                    Storage::disk($disk)->putFileAs('images/profile/photos', $image, $imageName);
+                    $path = Storage::disk(config('filesystems.default'))->putFileAs('images/profile/photos', $image, $imageName);
+                    
                 }
             }
 
@@ -471,17 +539,11 @@ class ProfileController extends Controller
             $photo = Photo::where('uuid', $uuid)->firstorfail();
             $link = $photo->qrCode;
             if (Auth::user()->localUser->id == $link->local_user_id) {
-                if (isset($photo->image) && $photo->image !== 'youtube_placeholder') {
-                    // Use S3 if configured, otherwise fallback to local deletion
-                    $disk = env('FILESYSTEM_DISK', 'local') === 's3' ? 's3' : 'local';
-                    
-                    if ($disk === 's3') {
-                        Storage::disk('s3')->delete('images/profile/photos/'.$photo->image);
-                    } else {
-                        $filePathToDeleteLayer = public_path('images/profile/photos/'.$photo->image);
-                        if (file_exists($filePathToDeleteLayer)) {
-                            unlink($filePathToDeleteLayer);
-                        }
+                if (isset($photo->image)) {
+                    $filePathToDeleteLayer = public_path('images/profile/photos/'.$photo->image);
+
+                    if (file_exists($filePathToDeleteLayer)) {
+                        unlink($filePathToDeleteLayer);
                     }
                 }
                 $photo->delete();
@@ -582,7 +644,8 @@ class ProfileController extends Controller
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $imageName = time().'_'.$image->getClientOriginalName();
-                Storage::disk('public')->putFileAs('images/profile/tributes', $image, $imageName);
+                Storage::disk(config('filesystems.default'))->putFileAs('images/profile/tributes', $image, $imageName);
+                
             }
 
             Tribute::create([
@@ -682,11 +745,14 @@ class ProfileController extends Controller
                 'data' => MyQrCodesResource::collection($links),
             ]);
         } catch (\Throwable $th) {
-            echo $th;
+            \Log::error('myQrCodes error: ' . $th->getMessage(), [
+                'exception' => $th,
+                'trace' => $th->getTraceAsString()
+            ]);
             return response()->json([
                 'status' => 500,
                 'message' => 'Internal server error',
-            ]);
+            ], 500);
         }
     }
     public function updateTimeline($uuid, Request $request)
@@ -769,7 +835,8 @@ class ProfileController extends Controller
                     }
                     $image = $request->file('image');
                     $imageName = time().'_'.$image->getClientOriginalName();
-                    Storage::disk('public')->putFileAs('images/profile/tributes', $image, $imageName);
+                    Storage::disk(config('filesystems.default'))->putFileAs('images/profile/tributes', $image, $imageName);
+                
                 }
                 $tribute->update([
                     'id' => $tribute->id,

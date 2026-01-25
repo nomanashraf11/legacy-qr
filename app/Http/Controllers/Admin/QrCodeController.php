@@ -20,7 +20,6 @@ use Yajra\DataTables\DataTables;
 use ZipArchive;
 use Maatwebsite\Excel\Excel;
 use App\Exports\LinksExport;
-use Illuminate\Support\Facades\Storage;
 
 
 
@@ -261,11 +260,15 @@ class QrCodeController extends Controller
 
             $writer = new Xlsx($spreadsheet);
             $filename = 'links.xlsx';
-            $savePath = public_path('excel/'.$filename); // Save path within storage directory
+            $excelDir = public_path('excel');
+            if (!file_exists($excelDir)) {
+                mkdir($excelDir, 0755, true);
+            }
+            $savePath = $excelDir . '/' . $filename;
             $writer = new Xlsx($spreadsheet);
             $writer->save($savePath);
 
-            return response()->download(public_path('excel/'.$filename))->deleteFileAfterSend(true);
+            return response()->download($savePath)->deleteFileAfterSend(true);
         } catch (\Throwable $th) {
             dd($th->getMessage());
         }
@@ -293,11 +296,15 @@ class QrCodeController extends Controller
 
             $writer = new Xlsx($spreadsheet);
             $filename = 'links.xlsx';
-            $savePath = public_path('excel/'.$filename); // Save path within storage directory
+            $excelDir = public_path('excel');
+            if (!file_exists($excelDir)) {
+                mkdir($excelDir, 0755, true);
+            }
+            $savePath = $excelDir . '/' . $filename;
             $writer = new Xlsx($spreadsheet);
             $writer->save($savePath);
 
-            return response()->download(public_path('excel/'.$filename))->deleteFileAfterSend(true);
+            return response()->download($savePath)->deleteFileAfterSend(true);
         } catch (\Throwable $th) {
             dd($th->getMessage());
         }
@@ -422,17 +429,17 @@ class QrCodeController extends Controller
             if ($qrCode->profile) {
                 if ($qrCode->profile->profile_picture) {
                     $filePathToDelete = public_path('images/profile/profile_pictures/'.$qrCode->profile->profile_picture);
-                    $this->deletePicture($filePathToDelete, 'images/profile/profile_pictures/'.$qrCode->profile->profile_picture);
+                    $this->deletePicture($filePathToDelete);
                 }
                 if ($qrCode->profile->cover_picture) {
                     $filePathToDelete = public_path('images/profile/cover_pictures/'.$qrCode->profile->cover_picture);
-                    $this->deletePicture($filePathToDelete, 'images/profile/cover_pictures/'.$qrCode->profile->cover_picture);
+                    $this->deletePicture($filePathToDelete);
                 }
                 if ($qrCode->profile->relations) {
                     foreach ($qrCode->profile->relations as $relation) {
                         if ($relation->image_name) {
                             $filePathToDelete = public_path('images/profile/relations/'.$relation->image_name);
-                            $this->deletePicture($filePathToDelete, 'images/profile/relations/'.$relation->image_name);
+                            $this->deletePicture($filePathToDelete);
                         }
                     }
                 }
@@ -440,9 +447,9 @@ class QrCodeController extends Controller
             }
             if ($qrCode->photos) {
                 foreach ($qrCode->photos as $photo) {
-                    if ($photo->image && $photo->image !== 'youtube_placeholder') {
+                    if ($photo->image) {
                         $filePathToDelete = public_path('images/profile/photos/'.$photo->image);
-                        $this->deletePicture($filePathToDelete, 'images/profile/photos/'.$photo->image);
+                        $this->deletePicture($filePathToDelete);
                     }
                 }
                 $qrCode->photos()->delete();
@@ -454,7 +461,7 @@ class QrCodeController extends Controller
                 foreach ($qrCode->tributes as $tribute) {
                     if ($tribute->image) {
                         $filePathToDelete = public_path('images/profile/tributes/'.$tribute->image);
-                        $this->deletePicture($filePathToDelete, 'images/profile/tributes/'.$tribute->image);
+                        $this->deletePicture($filePathToDelete);
                     }
                 }
                 $qrCode->tributes()->delete();
@@ -484,9 +491,9 @@ class QrCodeController extends Controller
         try {
             DB::beginTransaction();
             $photo = Photo::where('uuid', $uuid)->firstorfail();
-            if ($photo->image && $photo->image !== 'youtube_placeholder') {
+            if ($photo->image) {
                 $filePathToDelete = public_path('images/profile/photos/'.$photo->image);
-                $this->deletePicture($filePathToDelete, 'images/profile/photos/'.$photo->image);
+                $this->deletePicture($filePathToDelete);
             }
             $photo->delete();
             DB::commit();
@@ -509,7 +516,7 @@ class QrCodeController extends Controller
             $tribute = Tribute::where('uuid', $uuid)->firstorfail();
             if ($tribute->image) {
                 $tributeImage = public_path('images/profile/tributes/'.$tribute->image);
-                $this->deletePicture($tributeImage, 'images/profile/tributes/'.$tribute->image);
+                $this->deletePicture($tributeImage);
             }
             $tribute->delete();
             DB::commit();
@@ -570,17 +577,10 @@ class QrCodeController extends Controller
             dd($th->getMessage());
         }
     }
-    private function deletePicture($pictureWithCompletePath, $relativePath = null)
+    private function deletePicture($pictureWithCompletePath)
     {
-        // Use S3 if configured
-        $disk = env('FILESYSTEM_DISK', 'local') === 's3' ? 's3' : 'local';
-        
-        if ($disk === 's3' && $relativePath) {
-            Storage::disk('s3')->delete($relativePath);
-        } else {
-            if (file_exists($pictureWithCompletePath)) {
-                unlink($pictureWithCompletePath);
-            }
+        if (file_exists($pictureWithCompletePath)) {
+            unlink($pictureWithCompletePath);
         }
     }
 }

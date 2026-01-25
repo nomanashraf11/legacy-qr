@@ -17,14 +17,18 @@ class RedirectIfAuthenticated
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
-        $guards = empty($guards) ? [null] : $guards;
-
-        foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
-            }
-        }
-
+        // Disabled - allow access to login page even if authenticated
+        // This was causing redirects when trying to access /login
         return $next($request);
+        
+        // Original code (commented out):
+        // $guards = empty($guards) ? [null] : $guards;
+        // foreach ($guards as $guard) {
+        //     if (Auth::guard($guard)->check()) {
+        //         return redirect('/');
+        //     }
+        // }
+        // return $next($request);
     }
 }
+

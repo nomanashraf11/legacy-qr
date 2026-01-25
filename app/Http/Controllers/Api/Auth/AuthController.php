@@ -168,9 +168,15 @@ class AuthController extends Controller
                 'data' => new LoginResource($user),
             ]);
         } catch (\Throwable $e) {
+            \Log::error('Login error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
             return response()->json([
                 'status' => 500,
                 'message' => 'Something went wrong. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ]);
         }
     }

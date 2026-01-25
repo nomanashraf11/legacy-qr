@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class UserManagementController extends Controller
 {
@@ -154,17 +153,17 @@ class UserManagementController extends Controller
                             $profile = $link->profile;
                             if ($profile->profile_picture) {
                                 $filePathToDelete = public_path('images/profile/profile_pictures/'.$profile->profile_picture);
-                                $this->deletePicture($filePathToDelete, 'images/profile/profile_pictures/'.$profile->profile_picture);
+                                $this->deletePicture($filePathToDelete);
                             }
                             if ($profile->cover_picture) {
                                 $filePathToDelete = public_path('images/profile/cover_pictures/'.$profile->cover_picture);
-                                $this->deletePicture($filePathToDelete, 'images/profile/cover_pictures/'.$profile->cover_picture);
+                                $this->deletePicture($filePathToDelete);
                             }
                             if ($profile->relations) {
                                 foreach ($profile->relations as $relation) {
                                     if ($relation->image_name) {
                                         $filePathToDelete = public_path('images/profile/relations/'.$relation->image_name);
-                                        $this->deletePicture($filePathToDelete, 'images/profile/relations/'.$relation->image_name);
+                                        $this->deletePicture($filePathToDelete);
                                     }
                                 }
                                 $profile->relations()->delete();
@@ -176,9 +175,9 @@ class UserManagementController extends Controller
 
                         if ($link->photos) {
                             foreach ($link->photos as $photo) {
-                                if ($photo->image && $photo->image !== 'youtube_placeholder') {
+                                if ($photo->image) {
                                     $filePathToDelete = public_path('images/profile/photos/'.$photo->image);
-                                    $this->deletePicture($filePathToDelete, 'images/profile/photos/'.$photo->image);
+                                    $this->deletePicture($filePathToDelete);
                                 }
                             }
                             $link->photos()->delete();
@@ -191,7 +190,7 @@ class UserManagementController extends Controller
                             foreach ($link->tributes as $tribute) {
                                 if ($tribute->image) {
                                     $filePathToDelete = public_path('images/profile/tributes/'.$tribute->image);
-                                    $this->deletePicture($filePathToDelete, 'images/profile/tributes/'.$tribute->image);
+                                    $this->deletePicture($filePathToDelete);
                                 }
                             }
                             $link->tributes()->delete();
@@ -295,17 +294,10 @@ class UserManagementController extends Controller
             ]);
         }
     }
-    private function deletePicture($pictureWithCompletePath, $relativePath = null)
+    private function deletePicture($pictureWithCompletePath)
     {
-        // Use S3 if configured
-        $disk = env('FILESYSTEM_DISK', 'local') === 's3' ? 's3' : 'local';
-        
-        if ($disk === 's3' && $relativePath) {
-            Storage::disk('s3')->delete($relativePath);
-        } else {
-            if (file_exists($pictureWithCompletePath)) {
-                unlink($pictureWithCompletePath);
-            }
+        if (file_exists($pictureWithCompletePath)) {
+            unlink($pictureWithCompletePath);
         }
     }
 }

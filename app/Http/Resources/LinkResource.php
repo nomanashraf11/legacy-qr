@@ -44,18 +44,18 @@ class LinkResource extends JsonResource
             // 🎄 Add version_type to the Details section
             $data['version_type'] = $this->version_type ?? 'full';
             if ($this->profile && $this->profile->profile_picture) {
-                // Use S3 if configured, otherwise fallback to asset()
-                if (config('filesystems.default') === 's3') {
-                    $data['profile_picture'] = Storage::disk('s3')->url('images/profile/profile_pictures/'.$this->profile->profile_picture);
-                } else {
+                try {
+                    $data['profile_picture'] = Storage::disk(config('filesystems.default'))->url('images/profile/profile_pictures/'.$this->profile->profile_picture);
+                } catch (\Exception $e) {
+                    \Log::warning('LinkResource: Failed to generate S3 URL for profile_picture', ['error' => $e->getMessage()]);
                     $data['profile_picture'] = asset('images/profile/profile_pictures/'.$this->profile->profile_picture);
                 }
             }
             if ($this->profile && $this->profile->cover_picture) {
-                // Use S3 if configured, otherwise fallback to asset()
-                if (config('filesystems.default') === 's3') {
-                    $data['cover_picture'] = Storage::disk('s3')->url('images/profile/cover_pictures/'.$this->profile->cover_picture);
-                } else {
+                try {
+                    $data['cover_picture'] = Storage::disk(config('filesystems.default'))->url('images/profile/cover_pictures/'.$this->profile->cover_picture);
+                } catch (\Exception $e) {
+                    \Log::warning('LinkResource: Failed to generate S3 URL for cover_picture', ['error' => $e->getMessage()]);
                     $data['cover_picture'] = asset('images/profile/cover_pictures/'.$this->profile->cover_picture);
                 }
             }

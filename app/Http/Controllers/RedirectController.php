@@ -4,53 +4,59 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 
 class RedirectController extends Controller
 {
+    /**
+     * Redirect user after login based on their role
+     */
     public function redirectAfterLogin()
     {
-        try {
-            if (Auth::user()->hasRole('admin')) {
-                return redirect(route('admin.dashboard'))->with('verified', true);
-            }
-            if (Auth::user()->hasRole('re-sellers')) {
-                if (Auth::user()->changed == 1) {
-                    return redirect(route('sellar.dashboard'))->with('verified', true);
-                } else {
-                    return redirect(route('settings'))->with([
-                        'status' => true,
-                        'message' => 'Kindly Change your password'
-                    ]);
-                }
-            }
-            if (Auth::user()->hasRole('local_user')) {
-                Session::flush();
-                return redirect(route('login'))->with([
-                    'status' => false,
-                    'message' => 'You Cannot Login'
-                ]);
-            }
-        } catch (\Throwable $th) {
-            return redirect(route('login'))->with([
-                'status' => false,
-                'message' => 'Something went wrong'
-            ]);
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect('/login');
         }
+
+        // Check user roles and redirect accordingly
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->hasRole('re-sellers')) {
+            return redirect()->route('sellar.dashboard');
+        }
+
+        if ($user->hasRole('local_user')) {
+            return redirect('/home');
+        }
+
+        // Default redirect
+        return redirect('/home');
     }
 
+    /**
+     * Home page for authenticated users
+     */
     public function home()
     {
-        try {
-            return view('profile.show');
-            if (Auth::user()->hasRole('admin')) {
-                return redirect(route('admin.dashboard'))->with('verified', true);
-            }
-            if (Auth::user()->hasRole('re-sellers')) {
-                return redirect(route('sellar.dashboard'))->with('verified', true);
-            }
-        } catch (\Throwable $th) {
-            dd($th->getMessage());
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect('/login');
         }
+
+        // Redirect based on role
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->hasRole('re-sellers')) {
+            return redirect()->route('sellar.dashboard');
+        }
+
+        // For local users, show home page or redirect to React app
+        // You can customize this based on your needs
+        return redirect(config('app.frontend_url', 'http://localhost:3000'));
     }
 }

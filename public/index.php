@@ -50,6 +50,17 @@ $kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle(
     $request = Request::capture()
-)->send();
+);
+
+// Force CORS headers for ALL API requests - LOCAL DEVELOPMENT ONLY
+if ($request->is('api/*')) {
+    $response->headers->set('Access-Control-Allow-Origin', '*', true);
+    $response->headers->set('Access-Control-Allow-Methods', '*', true);
+    $response->headers->set('Access-Control-Allow-Headers', '*', true);
+    $response->headers->set('Access-Control-Expose-Headers', '*', true);
+    $response->headers->set('Access-Control-Max-Age', '86400', true);
+}
+
+$response->send();
 
 $kernel->terminate($request, $response);

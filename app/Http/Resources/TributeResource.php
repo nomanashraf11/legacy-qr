@@ -23,10 +23,10 @@ class TributeResource extends JsonResource
 
         ];
         if ($this->image) {
-            // Use S3 if configured, otherwise fallback to asset()
-            if (config('filesystems.default') === 's3') {
-                $data['image'] = Storage::disk('s3')->url('images/profile/tributes/' . $this->image);
-            } else {
+            try {
+                $data['image'] = Storage::disk(config('filesystems.default'))->url('images/profile/tributes/' . $this->image);
+            } catch (\Exception $e) {
+                \Log::warning('TributeResource: Failed to generate S3 URL', ['error' => $e->getMessage()]);
                 $data['image'] = asset('images/profile/tributes/' . $this->image);
             }
         }

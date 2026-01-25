@@ -80,16 +80,10 @@ class ReviewController extends Controller
             $review = Review::findorfail($id);
 
             if (isset($review->image)) {
-                // Use S3 if configured, otherwise fallback to local deletion
-                $disk = env('FILESYSTEM_DISK', 'local') === 's3' ? 's3' : 'local';
-                
-                if ($disk === 's3') {
-                    Storage::disk('s3')->delete('images/reviews/' . $review->image);
-                } else {
-                    $filePathToDeleteLayer = public_path('images/reviews/' . $review->image);
-                    if (file_exists($filePathToDeleteLayer)) {
-                        unlink($filePathToDeleteLayer);
-                    }
+                $filePathToDeleteLayer = public_path('images/reviews/' . $review->image);
+
+                if (file_exists($filePathToDeleteLayer)) {
+                    unlink($filePathToDeleteLayer);
                 }
             }
 
@@ -115,9 +109,7 @@ class ReviewController extends Controller
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-                // Use S3 if configured, otherwise fallback to public disk
-                $disk = env('FILESYSTEM_DISK', 'public') === 's3' ? 's3' : 'public';
-                Storage::disk($disk)->putFileAs('images/reviews/', $image, $imageName);
+                Storage::disk('public')->putFileAs('images/reviews/', $image, $imageName);
             }
             Review::create([
                 'uuid' => Str::uuid(),
