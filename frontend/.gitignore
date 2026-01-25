@@ -11,3 +11,12 @@ frontend/.env.local
 frontend/.env.production
 frontend/.env.development
 .env.deploy
+
+# Large binary files - shouldn't be in git
+public/ffmpeg/
+public/windows-ffmpeg/
+public/images/profile/photos/*.mp4
+public/images/profile/photos/*.mov
+public/images/profile/photos/*.avi
+public/images/profile/profile_pictures/test_*.txt
+public/images/qr_codes/*.svg
