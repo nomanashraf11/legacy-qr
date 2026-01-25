@@ -1,0 +1,32 @@
+Add environment-based frontend config, S3 fixes, and local build deployment
+
+Frontend Configuration:
+- Updated frontend config to use Vite environment variables
+- Added .env.local.example for local development
+- Created .env.local (gitignored) for local settings
+- Added build:prod script to package.json
+- Frontend defaults to production URLs if env vars not set
+
+S3 Upload Fixes:
+- Fixed S3 uploads by removing ACL visibility settings
+- Updated AWS_BUCKET to include account ID suffix
+- Removed all setVisibility() calls (bucket doesn't support ACLs)
+- Added error handling with local fallback for uploads
+
+CORS Configuration:
+- Added CORS headers for local development
+- Set all CORS headers to '*' for local testing
+- Updated exception handler to return JSON with CORS headers
+
+Deployment Scripts:
+- Created build-and-deploy.sh for local frontend builds
+- Created copy-build-to-server.sh for SCP file transfer
+- Created deploy-production-server-only.sh for backend deployment
+- Created deploy-production.sh for full server deployment
+- Added comprehensive deployment documentation
+
+This ensures:
+- Local development uses localhost API (via .env.local)
+- Production builds use production API automatically
+- No local config files committed to git
+- Frontend can be built locally and copied to server

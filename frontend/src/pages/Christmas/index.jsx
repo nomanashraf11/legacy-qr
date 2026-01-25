@@ -653,7 +653,8 @@ export const Christmas = () => {
             const response = await fetch(`${API_BASE_URL}/${id}/add_bio`, {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer ${token}`,
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
                 body: formDataObj,
             });

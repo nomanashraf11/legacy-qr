@@ -593,7 +593,7 @@ export const ChristmasSetupModal = ({
                                     }`}
                                 >
                                     <FaHeart className="inline mr-2" />
-                                    Write your message here (Optional)
+                                     Write your message here (Optional)
                                 </label>
                                 <textarea
                                     name="bio"
