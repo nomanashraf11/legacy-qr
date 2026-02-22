@@ -15,6 +15,8 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\ResellerApplicationController;
+use App\Http\Controllers\ResellerAuthController;
 use App\Http\Controllers\testvideo;
 
 
@@ -63,6 +65,9 @@ Route::get('how-it-works', [LandingPageController::class, 'howItWorks'])->name('
 Route::post('send-contact', [LandingPageController::class, 'sendContactMail'])->name('sendContact');
 Route::view('re-seller-page', 'landing.pages.reSeller')->name('reseller.view');
 Route::post('create-re-seller-request', [UserManagementController::class, 're_seller_request'])->name('reSellerRequest');
+Route::post('reseller-application', [ResellerApplicationController::class, 'store'])->name('reseller.application.store');
+Route::get('reseller-login', [ResellerAuthController::class, 'showLoginPage'])->name('reseller.login');
+Route::post('reseller-set-password', [ResellerAuthController::class, 'setPassword'])->name('reseller.setPassword');
 
 
 Route::view('help-center', 'landing.pages.help')->name('help.center');
@@ -124,7 +129,10 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::get('reviews', [ReviewController::class, 'list'])->name('admin.reviews');
     Route::post('store_review', [ReviewController::class, 'store'])->name('admin.review.store');
     Route::post('review/delete/{uuid}', [ReviewController::class, 'delete'])->name('admin.review.delete');
-    Route::get('re-sellers-request', [ReviewController::class, 'contact_mails'])->name('admin.contact.mail');
+    Route::get('reseller-applications', [UserManagementController::class, 'resellerApplications'])->name('admin.reseller.applications');
+    Route::get('reseller-applications/{id}', [UserManagementController::class, 'resellerApplicationDetail'])->name('admin.reseller.application.detail');
+    Route::post('reseller-applications/{id}/approve', [UserManagementController::class, 'approveResellerApplication'])->name('admin.reseller.application.approve');
+    Route::post('reseller-applications/{id}/reject', [UserManagementController::class, 'rejectResellerApplication'])->name('admin.reseller.application.reject');
     Route::get('inquiries', [ReviewController::class, 'inquries'])->name('admin.inquries.mail');
     Route::post('reply_mail', [ReviewController::class, 'reply'])->name('admin.mail.reply');
 
@@ -136,6 +144,7 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
 });
 Route::middleware(['auth', 'verified', 'role:admin|re-sellers', 'isBanned'])->group(function () {
     Route::get('order_details/{uuid}', [DashboardController::class, 'orderDetails'])->name('orderDetails');
+    Route::get('order_invoice/{uuid}', [DashboardController::class, 'invoiceView'])->name('order.invoice.view');
     Route::post('update_password', [SettingController::class, 'changePassword'])->name('updatePassword');
 });
 Route::prefix('re_sellers')->middleware('auth', 'verified', 'role:re-sellers', 'isBanned')->group(function () {
@@ -146,9 +155,20 @@ Route::prefix('re_sellers')->middleware('auth', 'verified', 'role:re-sellers', '
         Route::get('dashboard', 'dashboard')->name('sellar.dashboard');
         Route::get('buy_qr_codes_page', 'buy_qr_codes_page')->name('buyQrCodesPage');
         Route::get('my_orders', 'myOrders')->name('myOrders');
+        Route::get('invoices', 'invoices')->name('reseller.invoices');
         Route::get('stripe', 'stripe')->name('stripe.index');
         Route::post('stripe/checkout', 'stripeCheckout')->name('stripe.checkout');
         Route::get('stripe/checkout/success', 'stripeCheckoutSuccess')->name('stripe.checkout.success');
+    });
+
+    Route::controller(\App\Http\Controllers\Sellar\ProductCatalogController::class)->group(function () {
+        Route::get('products', 'index')->name('reseller.products');
+        Route::post('cart/add', 'addToCart')->name('reseller.cart.add');
+        Route::get('cart', 'cart')->name('reseller.cart');
+        Route::post('cart/update', 'updateCart')->name('reseller.cart.update');
+        Route::post('cart/remove', 'removeFromCart')->name('reseller.cart.remove');
+        Route::post('checkout', 'checkout')->name('reseller.checkout');
+        Route::get('checkout/success', 'checkoutSuccess')->name('reseller.checkout.success');
     });
 });
 

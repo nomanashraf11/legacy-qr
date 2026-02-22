@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateSellerRequest;
 use App\Http\Requests\ResellerRequest;
 use App\Mail\AccountCreatedMail;
+use App\Mail\ResellerInvitationMail;
 use App\Mail\ThankyouMail;
 use App\Models\Contact;
 use App\Models\ReSeller;
+use App\Models\ResellerApplication;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Yajra\DataTables\DataTables;
@@ -294,6 +296,140 @@ class UserManagementController extends Controller
             ]);
         }
     }
+    public function resellerApplications(Request $request)
+    {
+        try {
+            $applications = ResellerApplication::orderBy('created_at', 'desc')->get();
+            $pendingCount = ResellerApplication::where('status', ResellerApplication::STATUS_PENDING)->count();
+            return view('admin.pages.resellerApplications', compact('applications', 'pendingCount'));
+        } catch (\Throwable $th) {
+            return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'Something went wrong']);
+        }
+    }
+
+    public function resellerApplicationDetail($id)
+    {
+        try {
+            $app = ResellerApplication::findOrFail($id);
+            return response()->json($app);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+    }
+
+    public function approveResellerApplication($id)
+    {
+        try {
+            DB::beginTransaction();
+            $app = ResellerApplication::findOrFail($id);
+
+            if ($app->status !== ResellerApplication::STATUS_PENDING) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This application has already been processed.',
+                ]);
+            }
+
+            $existingUser = User::where('email', $app->email)->first();
+            if ($existingUser) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'A user with this email already exists.',
+                ]);
+            }
+
+            $password = Str::random(10);
+            $user = User::create([
+                'name' => $app->full_name,
+                'email' => $app->email,
+                'password' => Hash::make($password),
+                'email_verified_at' => now(),
+            ]);
+            $user->assignRole('re-sellers');
+
+            $shippingAddress = trim(implode(', ', array_filter([
+                $app->street_address,
+                $app->city,
+                $app->state,
+                $app->zip_code,
+            ])));
+
+            ReSeller::create([
+                'uuid' => Str::uuid(),
+                'phone' => $app->phone ?? $app->business_phone ?? '',
+                'website' => $app->website ?? '',
+                'shipping_address' => $shippingAddress ?: 'N/A',
+                'user_id' => $user->id,
+            ]);
+
+            $activationToken = Str::random(64);
+            $app->update([
+                'status' => ResellerApplication::STATUS_APPROVED,
+                'activation_token' => $activationToken,
+                'activation_token_expires_at' => now()->addDays(7),
+            ]);
+
+            $loginLink = url('/reseller-login?token=' . $activationToken);
+            try {
+                Mail::to($user->email)->send(new ResellerInvitationMail([
+                    'name' => $user->name,
+                    'loginLink' => $loginLink,
+                ]));
+                \Log::info('Reseller invitation email sent', ['email' => $user->email]);
+            } catch (\Throwable $mailError) {
+                \Log::error('Reseller invitation email failed', [
+                    'email' => $user->email,
+                    'error' => $mailError->getMessage(),
+                    'trace' => $mailError->getTraceAsString(),
+                ]);
+                // Account is created; user can use password reset if email fails
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Reseller account created successfully.',
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            \Log::error('Approve reseller application error: ' . $th->getMessage(), [
+                'exception' => $th,
+                'trace' => $th->getTraceAsString(),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong.',
+            ]);
+        }
+    }
+
+    public function rejectResellerApplication($id)
+    {
+        try {
+            $app = ResellerApplication::findOrFail($id);
+
+            if ($app->status !== ResellerApplication::STATUS_PENDING) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This application has already been processed.',
+                ]);
+            }
+
+            $app->update(['status' => ResellerApplication::STATUS_REJECTED]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Application rejected.',
+            ]);
+        } catch (\Throwable $th) {
+            \Log::error('Reject reseller application error: ' . $th->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong.',
+            ]);
+        }
+    }
+
     private function deletePicture($pictureWithCompletePath)
     {
         if (file_exists($pictureWithCompletePath)) {

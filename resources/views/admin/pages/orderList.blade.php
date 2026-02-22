@@ -7,7 +7,8 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box">
-                        <h4 class="page-title">My Orders</h4>
+                        <h4 class="page-title">Orders</h4>
+                        <p class="text-muted mb-0">View and dispatch reseller orders</p>
                     </div>
                 </div>
             </div>
@@ -18,8 +19,10 @@
                             style="width: 100%" id="orders_datatable">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Qr-Codes</th>
+                                    <th>Order #</th>
+                                    <th>Date</th>
+                                    <th>Reseller</th>
+                                    <th>Items</th>
                                     <th>Amount</th>
                                     <th>Status</th>
                                     <th>Action</th>
@@ -44,27 +47,14 @@
                 responsive: true,
                 asStripeClasses: false,
                 ajax: "{{ route('admin.orders') }}",
-                columns: [{
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'qr_codes',
-                        name: 'qr_codes'
-                    }, {
-                        data: 'amount',
-                        name: 'amount',
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: true,
-                        searchable: true
-                    }
+                columns: [
+                    { data: 'order_number', name: 'order_number' },
+                    { data: 'order_date', name: 'created_at' },
+                    { data: 'name', name: 'name' },
+                    { data: 'items', name: 'items' },
+                    { data: 'amount_fmt', name: 'amount' },
+                    { data: 'status', name: 'status' },
+                    { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],
                 language: {
                     paginate: {
@@ -75,16 +65,7 @@
                 drawCallback: function() {
                     $(" .pagination").addClass("pagination-rounded")
                 },
-                columnDefs: [{
-                    targets: 2, // Index of the 'amount' column
-                    type: 'num-fmt', // Set column type to numeric format
-                    render: function(data, type, row) {
-                        if (type === 'display') {
-                            return parseFloat(data).toFixed(2);
-                        }
-                        return data;
-                    }
-                }]
+                order: [[1, 'desc']]
             });
         });
     </script>

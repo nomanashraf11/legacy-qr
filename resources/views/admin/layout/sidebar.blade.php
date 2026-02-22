@@ -97,10 +97,10 @@
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-title="Re-Seller Request">
-                        <a href="{{ route('admin.contact.mail') }}" class="side-nav-link">
+                        data-bs-title="Reseller Applications">
+                        <a href="{{ route('admin.reseller.applications') }}" class="side-nav-link">
                             <i class="ri-user-received-line"></i>
-                            <span>Re-Seller Request</span>
+                            <span>Reseller Applications</span>
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Reviews">
@@ -129,10 +129,10 @@
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-title="Buy Qr Codes">
-                        <a href="{{ route('buyQrCodesPage') }}" class="side-nav-link">
+                        data-bs-title="Products">
+                        <a href="{{ route('reseller.products') }}" class="side-nav-link">
                             <i class="uil uil-shopping-cart-alt"></i>
-                            <span>Buy QrCodes</span>
+                            <span>Products</span>
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
@@ -140,6 +140,13 @@
                         <a href="{{ route('myOrders') }}" class="side-nav-link">
                             <i class="uil uil-bag-alt"></i>
                             <span>My Orders</span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-title="Invoices">
+                        <a href="{{ route('reseller.invoices') }}" class="side-nav-link">
+                            <i class="uil uil-receipt"></i>
+                            <span>Invoices</span>
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"

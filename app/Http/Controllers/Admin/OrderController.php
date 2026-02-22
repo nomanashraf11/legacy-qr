@@ -17,25 +17,38 @@ class OrderController extends Controller
     {
         try {
             if ($request->ajax()) {
-                $data = Order::all();
+                $data = Order::with(['reSeller.user', 'orderItems'])->orderBy('created_at', 'desc');
                 return Datatables::of($data)
                     ->addIndexColumn()
+                    ->addColumn('order_number', function ($row) {
+                        return '<span class="text-muted small">#' . substr($row->uuid, 0, 8) . '</span>';
+                    })
+                    ->addColumn('order_date', function ($row) {
+                        return $row->created_at ? $row->created_at->format('M j, Y') : '—';
+                    })
                     ->addColumn('action', function ($row) {
                         $viewOrder = route('orderDetails', $row->uuid);
-
-                        $btn = '<a href=' . $viewOrder . '><i class="mdi mdi-eye fs-3"></i></a> &nbsp;';
-
+                        $btn = '<a href="' . $viewOrder . '" class="me-2" title="View / Dispatch"><i class="mdi mdi-eye fs-4"></i></a>';
                         if ($row->status == 0) {
-                            $btn .= '<i class="changeStatusButton uil uil-truck text-danger fs-3" style="cursor:pointer;" name="deleteManagerButton" id="' . $row->uuid . '"></i>';
+                            $btn .= '<i class="changeStatusButton uil uil-truck text-primary fs-4" style="cursor:pointer;" title="Mark Delivered" id="' . $row->uuid . '"></i>';
                         }
-
                         return $btn;
                     })
                     ->addColumn('name', function ($row) {
-                        if ($row->reSeller) {
+                        if ($row->reSeller && $row->reSeller->user) {
                             return $row->reSeller->user->name;
                         }
-                        return "";
+                        return "—";
+                    })
+                    ->addColumn('items', function ($row) {
+                        if ($row->orderItems && $row->orderItems->isNotEmpty()) {
+                            $total = $row->orderItems->sum('quantity');
+                            return $total . ' item' . ($total > 1 ? 's' : '');
+                        }
+                        return $row->qr_codes . ' QR';
+                    })
+                    ->addColumn('amount_fmt', function ($row) {
+                        return '$' . number_format($row->amount, 2);
                     })
                     ->addColumn('status', function ($row) {
                         if ($row->status == 0) {
@@ -43,7 +56,7 @@ class OrderController extends Controller
                         }
                         return '<span class="badge bg-success">Delivered</span>';
                     })
-                    ->rawColumns(['name', 'status', 'action'])
+                    ->rawColumns(['order_number', 'order_date', 'name', 'items', 'amount_fmt', 'status', 'action'])
                     ->make(true);
             }
 

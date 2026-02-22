@@ -16,5 +16,6 @@ yarn-error.log
 /.vscode
 vendor/*
 .env
+test-credentials.txt
 __MACOSX/
 .DS_Store

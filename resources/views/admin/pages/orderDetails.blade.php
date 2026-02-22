@@ -14,7 +14,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>Tracking ID:</strong> {{ $order->tracking_id }}</p>
+                                        <p><strong>Tracking ID:</strong> {{ $order->tracking_id ?? '—' }}</p>
                                         <p><strong>Quantity:</strong> {{ $order->qr_codes }}</p>
                                         <p><strong>Amount:</strong> ${{ number_format($order->amount, 2) }}</p>
                                     </div>
@@ -27,13 +27,45 @@
                                             @endrole
                                         </p>
                                         @php
-                                            // dd($order->re_seller_id);
-                                            $resel = App\Models\ReSeller::where('id', $order->re_seller_id)->first();
+                                            $resel = $order->reSeller;
                                         @endphp
+                                        @if($resel && $resel->user)
                                         <p><strong>Name:</strong> {{ $resel->user->name }}</p>
-                                        <p><strong>Phone:</strong> {{ $resel->phone }}</p>
-                                        <p><strong>Shipping Address:</strong> Meer Market Jinnah Road</p>
+                                        <p><strong>Phone:</strong> {{ $resel->phone ?? '—' }}</p>
+                                        <p><strong>Shipping Address:</strong> {{ $resel->shipping_address ?? '—' }}</p>
+                                        @endif
                                     </div>
+                                </div>
+                                @if($order->orderItems && $order->orderItems->isNotEmpty())
+                                    <hr>
+                                    <h6 class="mb-3">Order Items</h6>
+                                    <table class="table table-sm">
+                                        <thead><tr><th>Product</th><th>SKU</th><th class="text-end">Qty</th><th class="text-end">Price</th><th class="text-end">Subtotal</th></tr></thead>
+                                        <tbody>
+                                            @foreach($order->orderItems as $oi)
+                                                @php $product = $oi->product; @endphp
+                                                <tr>
+                                                    <td>{{ $product ? $product->name : '—' }}</td>
+                                                    <td>{{ $product ? $product->sku : '—' }}</td>
+                                                    <td class="text-end">{{ $oi->quantity }}</td>
+                                                    <td class="text-end">${{ number_format($oi->price, 2) }}</td>
+                                                    <td class="text-end">${{ number_format($oi->price * $oi->quantity, 2) }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                @endif
+                                <div class="mt-4 pt-3 border-top d-flex flex-wrap gap-2">
+                                    <a href="{{ route('order.invoice.view', $order->uuid) }}" target="_blank" class="btn btn-outline-primary">
+                                        <i class="uil uil-print me-1"></i>View / Print Invoice
+                                    </a>
+                                    @role('admin')
+                                    @if($order->status == 0)
+                                        <button type="button" class="btn btn-success changeStatusButton" id="{{ $order->uuid }}">
+                                            <i class="uil uil-truck me-1"></i>Mark as Delivered
+                                        </button>
+                                    @endif
+                                    @endrole
                                 </div>
                             </div>
                         </div>
@@ -65,6 +97,7 @@
         </div>
     </div>
     @include('admin.pages.modals.editTrackingDetails')
+    @include('admin.pages.modals.delivered')
 @endsection
 @push('scripts')
     <script src="{{ asset('js/order.js') }}"></script>

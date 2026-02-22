@@ -23,27 +23,7 @@ class DashboardController extends Controller
     }
     public function buy_qr_codes_page()
     {
-        if (User::role('admin')->first()->admin->purchase == 1) {
-            return redirect(route('sellar.dashboard'))->with([
-                'status' => false,
-                'message' => 'Contact your admin to turn purchase ON'
-            ]);
-        }
-        if (Auth::user()->reSeller) {
-            if (Auth::user()->reSeller->shipping_address && Auth::user()->reSeller->phone) {
-                return view('admin.pages.buy');
-            } else {
-                return redirect(route('settings'))->with([
-                    'status' => false,
-                    'message' => 'Complete Your Profile First'
-                ]);
-            }
-        } else {
-            return redirect(route('settings'))->with([
-                'status' => false,
-                'message' => 'Complete Your Profile First'
-            ]);
-        }
+        return redirect()->route('reseller.products');
     }
     public function stripe(): View
     {
@@ -139,20 +119,26 @@ class DashboardController extends Controller
     {
         try {
             if ($request->ajax()) {
-                $data = Auth::user()->reSeller->orders;
+                $data = Auth::user()->reSeller->orders()->with('orderItems')->orderBy('created_at', 'desc');
 
                 return Datatables::of($data)
                     ->addIndexColumn()
-                    ->addColumn('name', function ($row) {
-
-                        if ($row->reSellar) {
-                            return  $row->reSellar->user->name;
-                        }
-                        return  "";
+                    ->addColumn('order_number', function ($row) {
+                        return '#' . substr($row->uuid, 0, 8);
                     })
-
+                    ->addColumn('order_date', function ($row) {
+                        return $row->created_at ? $row->created_at->format('M j, Y') : '—';
+                    })
+                    ->addColumn('items', function ($row) {
+                        if ($row->orderItems && $row->orderItems->isNotEmpty()) {
+                            return $row->orderItems->sum('quantity') . ' item(s)';
+                        }
+                        return $row->qr_codes . ' QR';
+                    })
+                    ->addColumn('amount_fmt', function ($row) {
+                        return '$' . number_format($row->amount, 2);
+                    })
                     ->addColumn('status', function ($row) {
-
                         if ($row->status == 0) {
                             return '<span class="badge bg-warning">Pending</span>';
                         }
@@ -160,10 +146,11 @@ class DashboardController extends Controller
                     })
                     ->addColumn('action', function ($row) {
                         $viewOrder = route('orderDetails', $row->uuid);
-                        return '<a href=' . $viewOrder . '>View</a>';
+                        $invoiceUrl = route('order.invoice.view', $row->uuid);
+                        return '<a href="' . $viewOrder . '" class="btn btn-sm btn-outline-primary me-1">View</a>' .
+                               '<a href="' . $invoiceUrl . '" target="_blank" class="btn btn-sm btn-outline-secondary">Invoice</a>';
                     })
-
-                    ->rawColumns(['name', 'status', 'action'])
+                    ->rawColumns(['order_number', 'order_date', 'items', 'amount_fmt', 'status', 'action'])
                     ->make(true);
             }
             return view('admin.pages.reseller.orderList');
@@ -172,13 +159,33 @@ class DashboardController extends Controller
             return redirect(route('admin.home'))->with(['status' => false, 'message' => 'Something went wrong']);
         }
     }
+
+    public function invoices()
+    {
+        $orders = Auth::user()->reSeller->orders()->with('orderItems.product')->orderBy('created_at', 'desc')->get();
+        return view('admin.pages.reseller.invoices', compact('orders'));
+    }
+
+    public function invoiceView($uuid)
+    {
+        $order = Order::with(['orderItems.product', 'reSeller.user'])->where('uuid', $uuid)->firstOrFail();
+        if (Auth::user()->hasRole('admin')) {
+            // Admin can view any invoice
+        } elseif (Auth::user()->reSeller && $order->re_seller_id !== Auth::user()->reSeller->id) {
+            abort(403);
+        }
+        return view('admin.pages.reseller.invoiceView', compact('order'));
+    }
     public function orderDetails($uuid)
     {
         try {
-            $order = Order::where('uuid', $uuid)->first();
+            $order = Order::with(['orderItems.product', 'reSeller.user'])->where('uuid', $uuid)->first();
+            if (!$order) {
+                abort(404);
+            }
             return view('admin.pages.orderDetails', compact('order'));
         } catch (\Throwable $th) {
-            //throw $th;
+            abort(404);
         }
     }
 }
