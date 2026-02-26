@@ -30,7 +30,18 @@
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;border-radius:12px;">
 <tr>
     <td style="padding:28px 24px 20px;text-align:center;">
-        <img src="{{ config('mail.logo_url') ?? \Illuminate\Support\Str::replaceFirst('http://', 'https://', asset('images/logo/Living_Legacy-logos_white.png')) }}" alt="Living Legacy" width="160" style="max-width:160px;height:auto;display:block;border:0;">
+        @php
+            $logoPath = public_path('images/logo/Living_Legacy-logos_white.png');
+            $logoUrl = config('mail.logo_url');
+            if ($logoUrl) {
+                $logoSrc = $logoUrl;
+            } elseif (file_exists($logoPath)) {
+                $logoSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            } else {
+                $logoSrc = \Illuminate\Support\Str::replaceFirst('http://', 'https://', asset('images/logo/Living_Legacy-logos_white.png'));
+            }
+        @endphp
+        <img src="{{ $logoSrc }}" alt="Living Legacy" width="160" style="max-width:160px;height:auto;display:block;border:0;">
     </td>
 </tr>
 <tr>

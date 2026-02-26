@@ -23,6 +23,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force Living Legacy as sender name (overrides .env MAIL_FROM_NAME)
+        config([
+            'mail.from.address' => config('mail.from.address') ?: 'notification@livinglegacyqr.com',
+            'mail.from.name' => 'Living Legacy',
+        ]);
+
         // Suppress Carbon deprecation warnings in development
         if (app()->environment('local', 'development')) {
             error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
