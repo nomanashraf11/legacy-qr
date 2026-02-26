@@ -108,8 +108,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'notification@livinglegacyqr.com'),
+        'name' => env('MAIL_FROM_NAME', 'Living Legacy'),
     ],
 
     /*
@@ -138,5 +138,13 @@ return [
     | Emails for admin notifications (new reseller applications, new orders).
     */
     'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL', 'partner@livinglegacyqr.com'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Email Logo URL
+    |--------------------------------------------------------------------------
+    | Full URL for the logo in transactional emails. Set if images don't load.
+    */
+    'logo_url' => env('MAIL_LOGO_URL', null),
 
 ];
