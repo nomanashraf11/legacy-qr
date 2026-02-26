@@ -61,6 +61,11 @@
                                     </a>
                                     @role('admin')
                                     @if($order->status == 0)
+                                        @if(!$order->accepted_at)
+                                            <button type="button" class="btn btn-primary acceptOrderButton" id="{{ $order->uuid }}">
+                                                <i class="uil uil-check-circle me-1"></i>Accept Order
+                                            </button>
+                                        @endif
                                         <button type="button" class="btn btn-success changeStatusButton" id="{{ $order->uuid }}">
                                             <i class="uil uil-truck me-1"></i>Mark as Delivered
                                         </button>

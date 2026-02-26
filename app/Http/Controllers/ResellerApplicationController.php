@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ResellerApplicationRequest;
+use App\Mail\AdminNewResellerApplicationMail;
 use App\Mail\ThankyouMail;
 use App\Models\ResellerApplication;
 use App\Models\User;
@@ -60,6 +61,21 @@ class ResellerApplicationController extends Controller
                 'userName' => $request->full_name,
             ];
             Mail::to($request->email)->send(new ThankyouMail($data));
+
+            $adminEmail = config('mail.admin_notification_email');
+            if ($adminEmail) {
+                try {
+                    Mail::to($adminEmail)->send(new AdminNewResellerApplicationMail([
+                        'fullName' => $request->full_name,
+                        'businessName' => $request->business_name,
+                        'email' => $request->email,
+                        'phone' => $request->phone ?? $request->business_phone ?? '—',
+                        'adminUrl' => url('/reseller-applications'),
+                    ]));
+                } catch (\Throwable $e) {
+                    \Log::warning('Admin new reseller notification failed: ' . $e->getMessage());
+                }
+            }
 
             DB::commit();
 

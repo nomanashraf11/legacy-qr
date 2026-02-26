@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Sellar;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AdminNewOrderMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -197,6 +199,21 @@ class ProductCatalogController extends Controller
                 'price' => $item['price'],
             ]);
             Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+        }
+
+        $adminEmail = config('mail.admin_notification_email');
+        if ($adminEmail) {
+            try {
+                Mail::to($adminEmail)->send(new AdminNewOrderMail([
+                    'orderNumber' => substr($order->uuid, 0, 8),
+                    'resellerName' => Auth::user()->name,
+                    'items' => $totalQty . ' item(s)',
+                    'amount' => number_format($totalAmount, 2),
+                    'adminUrl' => url('/orders'),
+                ]));
+            } catch (\Throwable $e) {
+                \Log::warning('Admin new order notification failed: ' . $e->getMessage());
+            }
         }
 
         session()->forget(['reseller_cart', 'reseller_checkout_cart']);

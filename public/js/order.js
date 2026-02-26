@@ -1,5 +1,38 @@
 var orderId = 0;
 $(function () {
+    $(document).on("click", ".acceptOrderButton", function () {
+        var id = $(this).attr("id");
+        $.ajax({
+            url: "/accept_order/" + id,
+            type: "POST",
+            data: {
+                _token:
+                    $('meta[name="csrf-token"]').attr("content") ||
+                    document.querySelector('input[name="_token"]')?.value,
+            },
+            success: function (response) {
+                toastr.options = {
+                    progressBar: true,
+                    closeButton: true,
+                    timeOut: 2000,
+                };
+                if (response.status === true) {
+                    toastr.success(response.message, "Success");
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastr.error(response.message, "Error");
+                }
+            },
+            error: function (xhr) {
+                toastr.error(
+                    xhr.responseJSON?.message || "Something went wrong",
+                    "Error"
+                );
+            },
+        });
+    });
     $(document).on("click", ".changeStatusButton", function () {
         orderId = $(this).attr("id");
         $("#deliverModal").modal("show");
@@ -53,8 +86,10 @@ $(function () {
             type: "GET",
             success: function (response) {
                 console.log(response);
-                $('#trackingModal #tracking_id').val(response.tracking_id);
-                $('#trackingModal #tracking_details').val(response.tracking_details);
+                $("#trackingModal #tracking_id").val(response.tracking_id);
+                $("#trackingModal #tracking_details").val(
+                    response.tracking_details
+                );
                 $("#trackingModal").modal("show");
             },
             error: function (errors) {

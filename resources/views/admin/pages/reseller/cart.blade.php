@@ -3,23 +3,26 @@
 @section('content')
     <div class="content">
         <div class="container-fluid pe-lg-4">
-            <div class="row">
+            <div class="row mb-4">
                 <div class="col-12">
-                    <div class="page-title-box">
-                        <h4 class="page-title">Cart</h4>
-                    </div>
+                    <h4 class="page-title mb-1">Cart</h4>
+                    <p class="text-muted mb-0">Review your items and proceed to checkout</p>
                 </div>
             </div>
 
             @if($cartItems->isEmpty())
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-body text-center py-5">
-                                <i class="uil uil-shopping-cart-alt display-4 text-muted mb-3"></i>
-                                <h5>Your cart is empty</h5>
-                                <p class="text-muted">Browse our catalog and add products to your cart.</p>
-                                <a href="{{ route('reseller.products') }}" class="btn btn-primary">Browse Products</a>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5 px-4">
+                                <div class="rounded-circle bg-light d-inline-flex p-4 mb-3">
+                                    <i class="uil uil-shopping-cart-alt display-4 text-muted"></i>
+                                </div>
+                                <h5 class="mb-2">Your cart is empty</h5>
+                                <p class="text-muted mb-4">Browse our catalog and add products to get started.</p>
+                                <a href="{{ route('reseller.products') }}" class="btn btn-primary px-4">
+                                    <i class="uil uil-shopping-bag me-2"></i>Browse Products
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -27,33 +30,32 @@
             @else
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
                                             <tr>
-                                                <th>Product</th>
-                                                <th>SKU</th>
-                                                <th class="text-center">Quantity</th>
-                                                <th class="text-end">Price</th>
-                                                <th class="text-end">Subtotal</th>
-                                                <th></th>
+                                                <th class="border-0 ps-4">Product</th>
+                                                <th class="border-0">SKU</th>
+                                                <th class="border-0 text-center" style="width: 100px;">Quantity</th>
+                                                <th class="border-0 text-end">Price</th>
+                                                <th class="border-0 text-end">Subtotal</th>
+                                                <th class="border-0 pe-4" style="width: 50px;"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($cartItems as $item)
                                                 <tr data-product-id="{{ $item['product_id'] }}" data-price="{{ $item['price'] }}">
-                                                    <td>{{ $item['name'] }}</td>
-                                                    <td>{{ $item['sku'] }}</td>
+                                                    <td class="ps-4 fw-medium">{{ $item['name'] }}</td>
+                                                    <td class="text-muted">{{ $item['sku'] }}</td>
                                                     <td class="text-center">
-                                                        <input type="number" class="form-control form-control-sm d-inline-block cart-qty" style="width: 70px;"
-                                                               value="{{ $item['quantity'] }}" min="1" data-product-id="{{ $item['product_id'] }}">
+                                                        <input type="number" class="form-control form-control-sm cart-qty mx-auto" style="width: 70px;" value="{{ $item['quantity'] }}" min="1" data-product-id="{{ $item['product_id'] }}">
                                                     </td>
                                                     <td class="text-end">${{ number_format($item['price'], 2) }}</td>
-                                                    <td class="text-end subtotal">${{ number_format($item['subtotal'], 2) }}</td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger remove-from-cart" data-product-id="{{ $item['product_id'] }}">
+                                                    <td class="text-end fw-medium subtotal">${{ number_format($item['subtotal'], 2) }}</td>
+                                                    <td class="pe-4">
+                                                        <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-from-cart" data-product-id="{{ $item['product_id'] }}" title="Remove">
                                                             <i class="uil uil-trash-alt"></i>
                                                         </button>
                                                     </td>
@@ -62,16 +64,16 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4 p-4 bg-light rounded-bottom">
                                     <a href="{{ route('reseller.products') }}" class="btn btn-outline-secondary">
-                                        <i class="uil uil-arrow-left me-1"></i>Continue Shopping
+                                        <i class="uil uil-arrow-left me-2"></i>Continue Shopping
                                     </a>
-                                    <div class="d-flex align-items-center gap-4">
-                                        <h5 class="mb-0">Total: <span class="text-primary" id="cartTotal">${{ number_format($total, 2) }}</span></h5>
+                                    <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                                        <div class="fs-5">Total: <span class="fw-bold text-primary" id="cartTotal">${{ number_format($total, 2) }}</span></div>
                                         <form action="{{ route('reseller.checkout') }}" method="post" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="uil uil-credit-card me-1"></i>Proceed to Checkout
+                                                <i class="uil uil-credit-card me-2"></i>Proceed to Checkout
                                             </button>
                                         </form>
                                     </div>

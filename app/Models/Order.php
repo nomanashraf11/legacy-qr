@@ -16,6 +16,13 @@ class Order extends Model
         'amount',
         'status',
         're_seller_id',
+        'accepted_at',
+        'shipping_email_sent',
+    ];
+
+    protected $casts = [
+        'accepted_at' => 'datetime',
+        'shipping_email_sent' => 'boolean',
     ];
     public function reSeller()
     {

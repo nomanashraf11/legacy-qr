@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\ResellerApplicationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ResetPasswordController;
@@ -25,6 +26,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('/signin', [AuthController::class, 'loginUser']);
 Route::post('/signup', [AuthController::class, 'register']);
+
+/** Reseller application (for Shopify or other external forms) */
+Route::post('/reseller-application', [ResellerApplicationController::class, 'store']);
 
 //Google login
 Route::post('/signin/google', [AuthController::class, "handleGoogleLogin"]);

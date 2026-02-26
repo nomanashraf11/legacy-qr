@@ -131,4 +131,12 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Notification Email
+    |--------------------------------------------------------------------------
+    | Emails for admin notifications (new reseller applications, new orders).
+    */
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL', 'partner@livinglegacyqr.com'),
+
 ];

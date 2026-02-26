@@ -1,36 +1,32 @@
 @extends('admin.layout.master')
+@section('title', 'Living Legacy | My Orders')
 @section('content')
     <div class="content">
-        <!-- Start Content-->
         <div class="container-fluid pe-lg-4">
-            <div class="row">
+            <div class="row mb-4">
                 <div class="col-12">
-                    <div class="page-title-box">
-                        <h4 class="page-title">My Orders</h4>
-                    </div>
+                    <h4 class="page-title mb-1">My Orders</h4>
+                    <p class="text-muted mb-0">View and track your orders</p>
                 </div>
             </div>
-            <section>
-                <div class="card">
-                    <div class="card-body">
-                        <table class="basic-datatable table table-striped dt-responsive nowrap w-100 no-footer dtr-inline"
-                            style="width: 100%" id="my_orders_datatable">
-                            <thead>
-                                <tr>
-                                    <th>Order #</th>
-                                    <th>Date</th>
-                                    <th>Items</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <table class="basic-datatable table table-hover dt-responsive nowrap w-100 no-footer dtr-inline" style="width: 100%" id="my_orders_datatable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
                 </div>
-            </section>
+            </div>
         </div>
     </div>
 @endsection

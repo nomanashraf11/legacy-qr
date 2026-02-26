@@ -121,6 +121,7 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::post('transfer_qr_code_data', [QrCodeController::class, 'transferData'])->name('admin.transfer.data');
 
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders');
+    Route::post('accept_order/{uuid}', [OrderController::class, 'acceptOrder'])->name('accept.order');
     Route::post('mark_as_delivered/{uuid}', [OrderController::class, 'markAsDelivered'])->name('delivered');
     Route::get('get_tracking_details/{uuid}', [OrderController::class, 'getTrackingDetails'])->name('get.tracking.details');
     Route::post('update_tracking_details/{uuid}', [OrderController::class, 'updateTrackingDetails'])->name('update.tracking.details');

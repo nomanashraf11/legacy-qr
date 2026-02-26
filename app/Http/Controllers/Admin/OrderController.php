@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderAcceptedMail;
 use App\Mail\OrderDeliveredMail;
+use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Models\ReSeller;
 use Illuminate\Http\Request;
@@ -66,6 +68,38 @@ class OrderController extends Controller
             return redirect(route('admin.home'))->with(['status' => false, 'message' => 'Something went wrong']);
         }
     }
+    public function acceptOrder($uuid)
+    {
+        try {
+            DB::beginTransaction();
+            $order = Order::where('uuid', $uuid)->firstOrFail();
+            if ($order->accepted_at) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Order already accepted',
+                ]);
+            }
+            $order->update(['accepted_at' => now()]);
+            DB::commit();
+
+            $data = [
+                'userName' => $order->reSeller->user->name,
+                'orderNumber' => substr($order->uuid, 0, 8),
+            ];
+            Mail::to($order->reSeller->user->email)->send(new OrderAcceptedMail($data));
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Order accepted. Reseller notified.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+            ]);
+        }
+    }
+
     public function markAsDelivered($uuid)
     {
         try {
@@ -79,6 +113,7 @@ class OrderController extends Controller
             $data = [
                 'tracking' => $order->tracking_id,
                 'userName' => $order->reSeller->user->name,
+                'orderNumber' => substr($order->uuid, 0, 8),
             ];
             Mail::to($order->reSeller->user->email)->send(new OrderDeliveredMail($data));
             return response()->json([
@@ -108,21 +143,33 @@ class OrderController extends Controller
     {
         try {
             DB::beginTransaction();
-            $order = Order::where('uuid', $uuid)->firstorfail();
+            $order = Order::where('uuid', $uuid)->firstOrFail();
+            $hadTracking = !empty($order->tracking_id);
             $order->update([
-                'id' => $order->id,
                 'tracking_id' => $request->tracking_id,
                 'tracking_details' => $request->tracking_details,
             ]);
             DB::commit();
+
+            if (!empty($request->tracking_id) && !$order->shipping_email_sent) {
+                $order->update(['shipping_email_sent' => true]);
+                $data = [
+                    'userName' => $order->reSeller->user->name,
+                    'orderNumber' => substr($order->uuid, 0, 8),
+                    'tracking' => $order->tracking_id,
+                    'trackingDetails' => $order->tracking_details,
+                ];
+                Mail::to($order->reSeller->user->email)->send(new OrderShippedMail($data));
+            }
+
             return response()->json([
                 'status' => true,
-                'message' => 'Updated Successfully'
+                'message' => 'Updated Successfully',
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Something went wrong'
+                'message' => 'Something went wrong',
             ]);
         }
     }

@@ -3,28 +3,29 @@
 @section('content')
     <div class="content">
         <div class="container-fluid pe-lg-4">
-            <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box d-flex flex-wrap align-items-center justify-content-between">
-                        <h4 class="page-title mb-0">Products</h4>
-                        <a href="{{ route('reseller.cart') }}" class="btn btn-primary position-relative">
-                            <i class="uil uil-shopping-cart-alt me-1"></i>Cart
-                            @if($cartCount > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $cartCount }}</span>
-                            @endif
-                        </a>
-                    </div>
+            <div class="row align-items-center mb-4">
+                <div class="col-12 col-md-6">
+                    <h4 class="page-title mb-1">Products</h4>
+                    <p class="text-muted mb-0">Browse our wholesale catalog</p>
+                </div>
+                <div class="col-12 col-md-6 text-md-end mt-2 mt-md-0">
+                    <a href="{{ route('reseller.cart') }}" class="btn btn-primary position-relative px-4">
+                        <i class="uil uil-shopping-cart-alt me-2"></i>Cart
+                        @if($cartCount > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $cartCount }}</span>
+                        @endif
+                    </a>
                 </div>
             </div>
 
-            <div class="row mb-4">
-                <div class="col-12">
-                    <p class="text-muted mb-0">Browse our wholesale catalog</p>
+            <div class="row g-3 mb-4">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="uil uil-search text-muted"></i></span>
+                        <input type="text" id="searchProducts" class="form-control" placeholder="Search products...">
+                    </div>
                 </div>
-                <div class="col-md-6 mt-2">
-                    <input type="text" id="searchProducts" class="form-control" placeholder="Search products...">
-                </div>
-                <div class="col-md-3 mt-2">
+                <div class="col-12 col-md-4 col-lg-3">
                     <select id="filterCategory" class="form-select">
                         <option value="">All Categories</option>
                         <option value="medallion">Medallions</option>
@@ -32,32 +33,37 @@
                 </div>
             </div>
 
-            <div class="row" id="productsList">
+            <div class="row g-4" id="productsList">
                 @forelse($products as $product)
-                    <div class="col-12 col-md-6 col-xl-4 product-card" data-search="{{ strtolower($product->name . ' ' . $product->sku) }}">
-                        <div class="card h-100">
-                            <img src="{{ asset('assets/images/products/living-legacy-medallion.png') }}" class="card-img-top" alt="{{ $product->name }}" style="object-fit: cover; height: 220px; background: #f5f5f5;">
+                    <div class="col-12 col-sm-6 col-xl-4 product-card" data-search="{{ strtolower($product->name . ' ' . $product->sku) }}">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="position-relative overflow-hidden rounded-top">
+                                <img src="{{ asset('assets/images/products/living-legacy-medallion.png') }}" class="card-img-top" alt="{{ $product->name }}" style="object-fit: cover; height: 220px; background: #f8f9fa;">
+                                <span class="badge bg-dark position-absolute top-0 end-0 m-2">{{ $product->sku }}</span>
+                            </div>
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ $product->name }}</h5>
-                                <p class="text-muted small mb-2">{{ $product->sku }}</p>
-                                <p class="fw-bold text-primary fs-4 mb-3">${{ number_format($product->price, 2) }}</p>
+                                <h5 class="card-title mb-2">{{ $product->name }}</h5>
+                                <p class="text-success fw-semibold fs-4 mb-2">${{ number_format($product->price, 2) }}</p>
                                 <p class="text-muted small mb-3">{{ $product->stock }} in stock</p>
-                                <div class="mt-auto">
-                                    <form class="add-to-cart-form d-flex align-items-center gap-2" data-product-id="{{ $product->id }}">
-                                        @csrf
-                                        <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}"
-                                               class="form-control form-control-sm" style="width: 80px;">
-                                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
-                                            <i class="uil uil-plus me-1"></i>Add
-                                        </button>
-                                    </form>
-                                </div>
+                                <form class="add-to-cart-form d-flex align-items-center gap-2 mt-auto" data-product-id="{{ $product->id }}">
+                                    @csrf
+                                    <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}" class="form-control form-control-sm" style="width: 72px;">
+                                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                                        <i class="uil uil-plus me-1"></i>Add to cart
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 @empty
                     <div class="col-12">
-                        <div class="alert alert-info">No products available at the moment.</div>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="uil uil-shopping-bag display-4 text-muted mb-3"></i>
+                                <h5>No products available</h5>
+                                <p class="text-muted mb-0">Check back later for new items.</p>
+                            </div>
+                        </div>
                     </div>
                 @endforelse
             </div>
