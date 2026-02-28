@@ -82,12 +82,12 @@
                                     <div class="col">
                                         <label for="name">Phone</label>
                                         <input class="form-control" type="text" id="nameInput" name="phone"
-                                            value="{{ $user->reSeller->phone ?? '' }}">
+                                            value="{{ $user->reSeller?->phone ?? '' }}">
                                     </div>
                                     <div class="col">
                                         <label for="name">Address</label>
                                         <input class="form-control" type="email" id="addressInput" name="address"
-                                            value="{{ $user->reSeller->shipping_address ?? '' }}">
+                                            value="{{ $user->reSeller?->shipping_address ?? '' }}">
                                     </div>
                                 </div>
                             @endrole
@@ -270,6 +270,19 @@
                 </div>
             @endrole
             @role('re-sellers')
+                @php $missingFields = session('missing_profile_fields', []); @endphp
+                @if (!empty($missingFields))
+                    <div class="alert alert-warning d-flex align-items-start" role="alert">
+                        <div class="flex-grow-1">
+                            <strong>{{ session('message', 'Complete your profile to continue.') }}</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($missingFields as $field => $label)
+                                    <li>{{ $label }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @endif
                 <form id="sellarUpdateAccount" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="card">
@@ -290,14 +303,14 @@
                             </div>
                             <div class="row my-3">
                                 <div class="col">
-                                    <label for="name">Phone</label>
-                                    <input class="form-control" type="text" id="nameInput" name="phone"
-                                        value="{{ $user->reSeller->phone ?? '' }}">
+                                    <label for="phoneInput">Phone <span class="text-danger">*</span></label>
+                                    <input class="form-control {{ isset($missingFields['phone']) ? 'border-warning' : '' }}" type="text" id="phoneInput" name="phone"
+                                        value="{{ $user->reSeller?->phone ?? '' }}" placeholder="Required for orders">
                                 </div>
                                 <div class="col">
-                                    <label for="name">Address</label>
-                                    <input class="form-control" type="text" id="addressInput" name="address"
-                                        value="{{ $user->reSeller->shipping_address ?? '' }}">
+                                    <label for="addressInput">Shipping Address <span class="text-danger">*</span></label>
+                                    <input class="form-control {{ isset($missingFields['address']) ? 'border-warning' : '' }}" type="text" id="addressInput" name="address"
+                                        value="{{ $user->reSeller?->shipping_address ?? '' }}" placeholder="Required for orders">
                                 </div>
                             </div>
                             <div class="text-end">

@@ -92,6 +92,21 @@ class ResellerAuthController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
 
+        $reseller = $user->reSeller;
+        $missing = [];
+        if (!$reseller || empty(trim($reseller->phone ?? ''))) {
+            $missing['phone'] = 'Phone Number';
+        }
+        if (!$reseller || empty(trim($reseller->shipping_address ?? '')) || ($reseller && $reseller->shipping_address === 'N/A')) {
+            $missing['address'] = 'Shipping Address';
+        }
+        if (!empty($missing)) {
+            return redirect()->route('settings')
+                ->with('status', true)
+                ->with('message', 'Password set successfully! Please complete your profile to browse products and place orders.')
+                ->with('missing_profile_fields', $missing);
+        }
+
         return redirect()->route('sellar.dashboard')->with('status', true)->with('message', 'Password set successfully. Welcome to your Reseller Portal!');
     }
 }

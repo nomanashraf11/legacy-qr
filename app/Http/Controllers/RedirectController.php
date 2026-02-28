@@ -24,6 +24,20 @@ class RedirectController extends Controller
         }
 
         if ($user->hasRole('re-sellers')) {
+            $reseller = $user->reSeller;
+            $missing = [];
+            if (!$reseller || empty(trim($reseller->phone ?? ''))) {
+                $missing['phone'] = 'Phone Number';
+            }
+            if (!$reseller || empty(trim($reseller->shipping_address ?? '')) || ($reseller && $reseller->shipping_address === 'N/A')) {
+                $missing['address'] = 'Shipping Address';
+            }
+            if (!empty($missing)) {
+                return redirect()->route('settings')
+                    ->with('status', false)
+                    ->with('message', 'Please complete your profile to browse products and place orders.')
+                    ->with('missing_profile_fields', $missing);
+            }
             return redirect()->route('sellar.dashboard');
         }
 

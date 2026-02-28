@@ -24,8 +24,22 @@ class ProductCatalogController extends Controller
             return redirect()->route('sellar.dashboard')->with('status', false)->with('message', 'Contact your admin to turn purchase ON');
         }
         $reseller = Auth::user()->reSeller;
-        if (!$reseller || !$reseller->shipping_address || !$reseller->phone) {
-            return redirect()->route('settings')->with('status', false)->with('message', 'Complete Your Profile First');
+        if (!$reseller) {
+            return redirect()->route('settings')->with('status', false)
+                ->with('message', 'Complete your profile to continue.')
+                ->with('missing_profile_fields', ['phone' => 'Phone Number', 'address' => 'Shipping Address']);
+        }
+        $missing = [];
+        if (empty(trim($reseller->phone ?? ''))) {
+            $missing['phone'] = 'Phone Number';
+        }
+        if (empty(trim($reseller->shipping_address ?? '')) || $reseller->shipping_address === 'N/A') {
+            $missing['address'] = 'Shipping Address';
+        }
+        if (!empty($missing)) {
+            return redirect()->route('settings')->with('status', false)
+                ->with('message', 'Please complete the following to browse products and place orders:')
+                ->with('missing_profile_fields', $missing);
         }
         return null;
     }
