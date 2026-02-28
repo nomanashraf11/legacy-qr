@@ -43,6 +43,9 @@
                             </div>
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title mb-2">{{ $product->name }}</h5>
+                                @if($product->description)
+                                    <p class="text-muted small mb-2">{{ Str::limit($product->description, 100) }}</p>
+                                @endif
                                 <p class="text-success fw-semibold fs-4 mb-2">${{ number_format($product->price, 2) }}</p>
                                 <p class="text-muted small mb-3">{{ $product->stock }} in stock</p>
                                 <form class="add-to-cart-form d-flex align-items-center gap-2 mt-auto" data-product-id="{{ $product->id }}">

@@ -120,6 +120,9 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::view('transfer_qr_code', 'admin.pages.transfer')->name('admin.transfer.page');
     Route::post('transfer_qr_code_data', [QrCodeController::class, 'transferData'])->name('admin.transfer.data');
 
+    Route::get('products', [\App\Http\Controllers\Admin\ProductController::class, 'index'])->name('admin.products');
+    Route::get('products/{product}/edit', [\App\Http\Controllers\Admin\ProductController::class, 'edit'])->name('admin.products.edit');
+    Route::post('products/{product}', [\App\Http\Controllers\Admin\ProductController::class, 'update'])->name('admin.products.update');
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('accept_order/{uuid}', [OrderController::class, 'acceptOrder'])->name('accept.order');
     Route::post('mark_as_delivered/{uuid}', [OrderController::class, 'markAsDelivered'])->name('delivered');

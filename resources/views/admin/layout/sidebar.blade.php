@@ -70,6 +70,12 @@
                             <span>Transfer QR Codes</span>
                         </a>
                     </li>
+                    <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Products">
+                        <a href="{{ route('admin.products') }}" class="side-nav-link">
+                            <i class="uil uil-bag-alt"></i>
+                            <span>Products</span>
+                        </a>
+                    </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Orders">
                         <a href="{{ route('admin.orders') }}" class="side-nav-link">
                             <i class="uil uil-shopping-cart-alt"></i>
