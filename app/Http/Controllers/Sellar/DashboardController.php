@@ -46,7 +46,11 @@ class DashboardController extends Controller
             $price = User::role('admin')->first()->admin->qr_price;
             $amount = $number_of_qr_codes * $price;
 
-            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $stripeSecret = config('services.stripe.secret');
+            if (empty($stripeSecret)) {
+                return redirect()->back()->with('status', false)->with('message', 'Payment is not configured. Please contact support.');
+            }
+            $stripe = new \Stripe\StripeClient($stripeSecret);
             $redirectUrl = route('stripe.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}';
 
 
@@ -86,7 +90,11 @@ class DashboardController extends Controller
     {
         try {
             DB::beginTransaction();
-            $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+            $stripeSecret = config('services.stripe.secret');
+            if (empty($stripeSecret)) {
+                return redirect()->back()->with('status', false)->with('message', 'Payment is not configured.');
+            }
+            $stripe = new \Stripe\StripeClient($stripeSecret);
             $response = $stripe->checkout->sessions->retrieve($request->session_id);
             $amount = session('amount');
             $number_of_qr_codes = session('number_of_qr_codes');

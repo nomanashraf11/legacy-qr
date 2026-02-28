@@ -150,7 +150,11 @@ class ProductCatalogController extends Controller
             ];
         }
 
-        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+        $stripeSecret = config('services.stripe.secret');
+        if (empty($stripeSecret)) {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Payment is not configured. Please contact support.');
+        }
+        $stripe = new \Stripe\StripeClient($stripeSecret);
         $session = $stripe->checkout->sessions->create([
             'success_url' => route('reseller.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('reseller.cart'),
@@ -172,7 +176,11 @@ class ProductCatalogController extends Controller
             return redirect()->route('reseller.products')->with('status', false)->with('message', 'Session expired.');
         }
 
-        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET'));
+        $stripeSecret = config('services.stripe.secret');
+        if (empty($stripeSecret)) {
+            return redirect()->route('reseller.products')->with('status', false)->with('message', 'Payment is not configured.');
+        }
+        $stripe = new \Stripe\StripeClient($stripeSecret);
         $session = $stripe->checkout->sessions->retrieve($request->session_id);
 
         if ($session->payment_status !== 'paid') {
