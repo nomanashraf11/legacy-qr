@@ -35,7 +35,7 @@
 
                     <span class="d-lg-flex flex-column gap-1 d-none">
                         <h5 class="my-0">{{ Auth::user()->name }}</h5>
-                        <h6 class="my-0 fw-normal">Admin</h6>
+                        <h6 class="my-0 fw-normal">@if(Auth::user()->hasRole('admin'))Admin@elseif(Auth::user()->hasRole('re-sellers'))Reseller@elseAccount@endif</h6>
                     </span>
 
                     <span class="d-lg-none ">
