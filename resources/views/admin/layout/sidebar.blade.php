@@ -1,7 +1,7 @@
 <div class="leftside-menu overflow-hidden">
 
     <!-- Brand Logo Light -->
-    <a href="{{ rtrim(config('app.main_site_url', 'https://livinglegacyqr.com'), '/') }}/" target="_blank" class="logo logo-dark pt-2 text-center">
+    <a href="https://livinglegacyqr.com" target="_blank" class="logo logo-dark pt-2 text-center">
 
         <img class="d-sm-none d-block" style="max-width: 100px; width: 100%;" src="{{ asset('images/logo/cropped.png') }}">
         <img class="d-none d-sm-block mx-auto" style="max-width: 80px; width: 100%;"
