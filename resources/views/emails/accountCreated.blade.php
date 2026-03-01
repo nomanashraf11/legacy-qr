@@ -93,7 +93,7 @@
 
         table,
         td {
-            color: #000000;
+            color: #1a365d;
         }
 
         #u_body a {
@@ -112,7 +112,7 @@
 </head>
 
 <body class="clean-body u_body"
-    style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #f9f9f9;color: #000000">
+    style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #f9f9f9;color: #1a365d">
     <!--[if IE]><div class="ie-container"><![endif]-->
     <!--[if mso]><div class="mso-container"><![endif]-->
     <table id="u_body"
@@ -182,10 +182,10 @@
 
                     <div class="u-row-container" style="padding: 0px;background-color: transparent">
                         <div class="u-row"
-                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #000000;">
+                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #1a365d;">
                             <div
                                 style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #000000;"><![endif]-->
+                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #1a365d;"><![endif]-->
 
                                 <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
                                 <div class="u-col u-col-100"
@@ -209,7 +209,7 @@
                                                                     <td style="padding-right: 0px;padding-left: 0px;"
                                                                         align="center">
                                                                         <img align="center" border="0"
-                                                                            src="{{ asset('images/logo/Living_Legacy-logos_white.png') }}"
+                                                                            src="https://res.cloudinary.com/djjd5w5dw/image/upload/v1757955293/logocentered_e0clto.png"
                                                                             alt="Image" title="Image"
                                                                             style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 29%;max-width: 168.2px;"
                                                                             width="168.2" />
@@ -236,10 +236,10 @@
 
                     <div class="u-row-container" style="padding: 0px;background-color: transparent">
                         <div class="u-row"
-                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #000000;">
+                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #1a365d;">
                             <div
                                 style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #000000;"><![endif]-->
+                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #1a365d;"><![endif]-->
 
                                 <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
                                 <div class="u-col u-col-100"
@@ -288,10 +288,10 @@
 
                     <div class="u-row-container" style="padding: 0px;background-color: transparent">
                         <div class="u-row"
-                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #000000;">
+                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #ffffff;">
                             <div
                                 style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #000000;"><![endif]-->
+                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #ffffff;"><![endif]-->
 
                                 <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
                                 <div class="u-col u-col-100"
@@ -310,35 +310,35 @@
                                                             align="left">
 
                                                             <div
-                                                                style="font-size: 14px; color: #6f1d1d; line-height: 140%; text-align: left; word-wrap: break-word;">
+                                                                style="font-size: 14px; color: #4b5563; line-height: 140%; text-align: left; word-wrap: break-word;">
                                                                 <p style="font-size: 14px; line-height: 140%;"><span
-                                                                        style="font-size: 18px; line-height: 25.2px; color: #ecf0f1;">Hello,</span>
+                                                                        style="font-size: 18px; line-height: 25.2px; color: #4b5563;">Hello,</span>
                                                                 </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"> </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"><span
-                                                                        style="font-size: 18px; line-height: 25.2px; color: #ecf0f1;">Your
+                                                                        style="font-size: 18px; line-height: 25.2px; color: #4b5563;">Your
                                                                         Account has been
                                                                         <span
                                                                             style="line-height: 19.6px;">created</span>
                                                                         Successfully</span></p>
                                                                 <p style="font-size: 14px; line-height: 140%;"> </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"><span
-                                                                        style="font-size: 18px; line-height: 25.2px; color: #ecf0f1;">Account
+                                                                        style="font-size: 18px; line-height: 25.2px; color: #4b5563;">Account
                                                                         Details: </span>
                                                                 </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"> </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"><span
-                                                                        style="font-size: 18px; line-height: 25.2px; color: #ecf0f1;">Name:
+                                                                        style="font-size: 18px; line-height: 25.2px; color: #4b5563;">Name:
                                                                         {{ $data['name'] }} </span>
                                                                 </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"><span
-                                                                        style="font-size: 18px; line-height: 25.2px; color: #ecf0f1;">
-                                                                        Email: <a style="color: #ffffff"
+                                                                        style="font-size: 18px; line-height: 25.2px; color: #4b5563;">
+                                                                        Email: <a style="color: #0f66a9"
                                                                             href="#">{{ $data['email'] }}</a>
                                                                     </span>
                                                                 </p>
                                                                 <p style="font-size: 14px; line-height: 140%;"><span
-                                                                        style="font-size: 18px; line-height: 25.2px; color: #ecf0f1;">Password:
+                                                                        style="font-size: 18px; line-height: 25.2px; color: #4b5563;">Password:
                                                                         {{ $data['password'] }} </span>
                                                                 </p>
                                                             </div>
@@ -356,10 +356,10 @@
 
                                                             <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                                             <div align="left">
-                                                                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="" style="height:52px; v-text-anchor:middle; width:205px;" arcsize="2%"  stroke="f" fillcolor="#18163a"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+                                                                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="" style="height:52px; v-text-anchor:middle; width:205px;" arcsize="2%"  stroke="f" fillcolor="#0f66a9"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
                                                                 <a href="{{ env('APP_URL') }}" target="_blank"
                                                                     class="v-button"
-                                                                    style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF !important; background-color: #18163a; border-radius: 1px;-webkit-border-radius: 1px; -moz-border-radius: 1px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
+                                                                    style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF !important; background: linear-gradient(135deg, #0f66a9 0%, #1a7fc9 100%); border-radius: 1px;-webkit-border-radius: 1px; -moz-border-radius: 1px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
                                                                     <span
                                                                         style="display:block;padding:15px 40px;line-height:120%;"><span
                                                                             style="font-size: 18px; line-height: 21.6px;">Go
@@ -409,10 +409,10 @@
 
                     <div class="u-row-container" style="padding: 0px;background-color: #f9f9f9">
                         <div class="u-row"
-                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #000000;">
+                            style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #f9fafb;">
                             <div
                                 style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
-                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: #f9f9f9;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #000000;"><![endif]-->
+                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: #f9f9f9;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: #f9fafb;"><![endif]-->
 
                                 <!--[if (mso)|(IE)]><td align="center" width="600" style="width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
                                 <div class="u-col u-col-100"
@@ -433,7 +433,7 @@
                                                             <div
                                                                 style="font-size: 14px; line-height: 140%; text-align: center; word-wrap: break-word;">
                                                                 <p style="line-height: 140%;"><span
-                                                                        style="color: #ecf0f1; line-height: 19.6px;">Living
+                                                                        style="color: #4b5563; line-height: 19.6px;">Living
                                                                         Legacy</span></p>
                                                             </div>
 

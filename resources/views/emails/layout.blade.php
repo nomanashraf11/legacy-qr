@@ -5,58 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Living Legacy')</title>
     <style type="text/css">
-        body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; background-color: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; background-color: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         table { border-collapse: collapse; }
         .wrapper { max-width: 600px; margin: 0 auto; }
-        .card { background-color: #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
-        .logo-cell { padding: 28px 24px 20px; text-align: center; }
+        .card { background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+        .header-bar { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 24px; text-align: center; }
+        .logo-cell { padding: 0; text-align: center; }
         .logo { max-width: 160px; height: auto; display: block; margin: 0 auto; }
-        .title-cell { padding: 8px 24px 24px; text-align: center; }
-        .title { font-size: 22px; font-weight: 600; color: #ffffff; margin: 0; }
-        .body-cell { padding: 0 32px 32px; }
-        .body-text { font-size: 16px; line-height: 1.6; color: #e5e5e5; margin: 0 0 16px; }
-        .body-text strong { color: #fff; }
-        .footer-cell { padding: 16px 24px; background-color: #0d0d0d; text-align: center; }
-        .footer-text { font-size: 13px; color: #888; margin: 0; }
-        .btn { display: inline-block; padding: 14px 32px; background-color: #0f66a9; color: #ffffff !important; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; margin: 8px 0 24px; }
-        .muted { font-size: 14px; color: #9ca3af; margin-top: 20px; }
+        .title-cell { padding: 24px 24px 8px; text-align: center; background-color: #ffffff; }
+        .title { font-size: 22px; font-weight: 600; color: #1a365d; margin: 0; }
+        .body-cell { padding: 0 32px 32px; background-color: #ffffff; }
+        .body-text { font-size: 16px; line-height: 1.6; color: #4b5563; margin: 0 0 16px; }
+        .body-text strong { color: #1f2937; }
+        .footer-cell { padding: 20px 24px; background-color: #f9fafb; text-align: center; border-top: 1px solid #e5e7eb; }
+        .footer-text { font-size: 13px; color: #6b7280; margin: 0; }
+        .btn { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #0f66a9 0%, #1a7fc9 100%); color: #ffffff !important; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; margin: 8px 0 24px; box-shadow: 0 2px 8px rgba(15, 102, 169, 0.3); }
+        .btn:hover { background: linear-gradient(135deg, #0d5a94 0%, #1569a8 100%); }
+        .link { color: #0f66a9; text-decoration: none; font-weight: 500; }
+        .link:hover { text-decoration: underline; }
+        .muted { font-size: 14px; color: #6b7280; margin-top: 20px; }
     </style>
 </head>
-<body style="margin:0;padding:0;background-color:#f5f5f5;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;">
+<body style="margin:0;padding:0;background-color:#f5f7fa;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f7fa;">
 <tr><td style="padding:32px 16px;">
-<table width="600" cellpadding="0" cellspacing="0" align="center" style="max-width:600px;margin:0 auto;">
-<tr><td>
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;border-radius:12px;">
+<table width="600" cellpadding="0" cellspacing="0" align="center" style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden;">
 <tr>
-    <td style="padding:28px 24px 20px;text-align:center;">
-        @php
-            $logoPath = public_path('images/logo/Living_Legacy-logos_white.png');
-            $logoUrl = config('mail.logo_url');
-            if ($logoUrl) {
-                $logoSrc = $logoUrl;
-            } elseif (file_exists($logoPath)) {
-                $logoSrc = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
-            } else {
-                $logoSrc = \Illuminate\Support\Str::replaceFirst('http://', 'https://', asset('images/logo/Living_Legacy-logos_white.png'));
-            }
-        @endphp
-        <img src="{{ $logoSrc }}" alt="Living Legacy" width="160" style="max-width:160px;height:auto;display:block;border:0;">
+    <td style="background:linear-gradient(135deg, #1a365d 0%, #2c5282 100%);padding:28px 24px;text-align:center;">
+        <img src="https://res.cloudinary.com/djjd5w5dw/image/upload/v1757955293/logocentered_e0clto.png" alt="Living Legacy" width="160" style="max-width:160px;height:auto;display:block;margin:0 auto;border:0;">
     </td>
 </tr>
 <tr>
-    <td style="padding:8px 24px 24px;text-align:center;">
-        <h1 style="font-size:22px;font-weight:600;color:#ffffff;margin:0;">@yield('heading')</h1>
+    <td style="padding:24px 24px 8px;text-align:center;background-color:#ffffff;">
+        <h1 style="font-size:22px;font-weight:600;color:#1a365d;margin:0;">@yield('heading')</h1>
     </td>
 </tr>
 <tr>
-    <td style="padding:0 32px 32px;">
+    <td style="padding:0 32px 32px;background-color:#ffffff;">
         @yield('body')
     </td>
 </tr>
 <tr>
-    <td style="padding:16px 24px;background-color:#0d0d0d;text-align:center;">
-        <p style="font-size:13px;color:#888;margin:0;">Living Legacy</p>
+    <td style="padding:20px 24px;background-color:#f9fafb;text-align:center;border-top:1px solid #e5e7eb;">
+        <p style="font-size:13px;color:#6b7280;margin:0;">Living Legacy · Preserving Memories</p>
     </td>
 </tr>
 </table>
