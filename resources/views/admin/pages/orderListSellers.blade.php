@@ -37,6 +37,8 @@
                                     <td>
                                         @if ($order->status == 0)
                                             <span class="badge bg-warning">Pending</span>
+                                        @elseif ($order->status == 1)
+                                            <span class="badge bg-info">In Progress</span>
                                         @else
                                             <span class="badge bg-success">Delivered</span>
                                         @endif

@@ -18,8 +18,25 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
-        $orders = Auth::user()->reSeller->orders;
-        return view('admin.pages.dashboard', compact('orders'));
+        $reseller = Auth::user()->reSeller;
+        $orders = $reseller->orders()->orderBy('created_at', 'desc')->get();
+
+        $totalOrders = $orders->count();
+        $pendingOrders = $orders->whereIn('status', [0, 1])->count();
+        $outstandingBalance = $orders->whereIn('status', [0, 1])->sum('amount');
+        $activeShipments = $orders->where('status', 1)->count();
+        $recentOrders = $orders->take(5);
+        $pendingInvoicesCount = $pendingOrders;
+
+        return view('admin.pages.dashboard', compact(
+            'orders',
+            'totalOrders',
+            'pendingOrders',
+            'outstandingBalance',
+            'activeShipments',
+            'recentOrders',
+            'pendingInvoicesCount'
+        ));
     }
     public function buy_qr_codes_page()
     {
@@ -146,9 +163,19 @@ class DashboardController extends Controller
                     ->addColumn('amount_fmt', function ($row) {
                         return '$' . number_format($row->amount, 2);
                     })
+                    ->addColumn('tracking', function ($row) {
+                        if ($row->tracking_id) {
+                            $carrier = $row->shipping_carrier ? $row->shipping_carrier . ': ' : '';
+                            return '<span class="text-primary small">' . e($carrier) . e($row->tracking_id) . '</span>';
+                        }
+                        return '—';
+                    })
                     ->addColumn('status', function ($row) {
                         if ($row->status == 0) {
                             return '<span class="badge bg-warning">Pending</span>';
+                        }
+                        if ($row->status == 1) {
+                            return '<span class="badge bg-info">In Progress</span>';
                         }
                         return '<span class="badge bg-success">Delivered</span>';
                     })
@@ -158,7 +185,7 @@ class DashboardController extends Controller
                         return '<a href="' . $viewOrder . '" class="btn btn-sm btn-outline-primary me-1">View</a>' .
                                '<a href="' . $invoiceUrl . '" target="_blank" class="btn btn-sm btn-outline-secondary">Invoice</a>';
                     })
-                    ->rawColumns(['order_number', 'order_date', 'items', 'amount_fmt', 'status', 'action'])
+                    ->rawColumns(['order_number', 'order_date', 'items', 'amount_fmt', 'tracking', 'status', 'action'])
                     ->make(true);
             }
             return view('admin.pages.reseller.orderList');

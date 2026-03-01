@@ -14,18 +14,28 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6">
+                                        <p><strong>Status:</strong>
+                                            @if($order->status == \App\Models\Order::STATUS_PENDING)
+                                                <span class="badge bg-warning">Pending</span>
+                                            @elseif($order->status == \App\Models\Order::STATUS_IN_PROGRESS)
+                                                <span class="badge bg-info">In Progress</span>
+                                            @else
+                                                <span class="badge bg-success">Delivered</span>
+                                            @endif
+                                            @role('admin')
+                                                @if($order->status != \App\Models\Order::STATUS_DELIVERED)
+                                                    <a class="changeTrackingDetails ms-3 pointer" id={{ $order->uuid }} title="Add / Edit Shipping">
+                                                        <i class="mdi mdi-pencil-outline fs-5"></i>
+                                                    </a>
+                                                @endif
+                                            @endrole
+                                        </p>
+                                        <p><strong>Carrier:</strong> {{ $order->shipping_carrier ?? '—' }}</p>
                                         <p><strong>Tracking ID:</strong> {{ $order->tracking_id ?? '—' }}</p>
                                         <p><strong>Quantity:</strong> {{ $order->qr_codes }}</p>
                                         <p><strong>Amount:</strong> ${{ number_format($order->amount, 2) }}</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Status:</strong> {{ $order->tracking_details }}
-                                            @role('admin')
-                                                <a class="changeTrackingDetails ms-3 pointer" id={{ $order->uuid }}>
-                                                    <i class="mdi mdi-pencil-outline fs-5"></i>
-                                                </a>
-                                            @endrole
-                                        </p>
                                         @php
                                             $resel = $order->reSeller;
                                         @endphp
@@ -60,14 +70,17 @@
                                         <i class="uil uil-print me-1"></i>View / Print Invoice
                                     </a>
                                     @role('admin')
-                                    @if($order->status == 0)
+                                    @if($order->status != \App\Models\Order::STATUS_DELIVERED)
                                         @if(!$order->accepted_at)
                                             <button type="button" class="btn btn-primary acceptOrderButton" id="{{ $order->uuid }}">
                                                 <i class="uil uil-check-circle me-1"></i>Accept Order
                                             </button>
                                         @endif
+                                        <button type="button" class="btn btn-outline-primary changeTrackingDetails" id="{{ $order->uuid }}">
+                                            <i class="uil uil-truck me-1"></i>Add Shipping Info
+                                        </button>
                                         <button type="button" class="btn btn-success changeStatusButton" id="{{ $order->uuid }}">
-                                            <i class="uil uil-truck me-1"></i>Mark as Delivered
+                                            <i class="uil uil-check me-1"></i>Mark as Delivered
                                         </button>
                                     @endif
                                     @endrole

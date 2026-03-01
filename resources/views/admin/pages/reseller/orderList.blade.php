@@ -18,6 +18,7 @@
                                 <th>Date</th>
                                 <th>Items</th>
                                 <th>Amount</th>
+                                <th>Tracking</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -44,6 +45,7 @@
                     { data: 'order_date', name: 'created_at' },
                     { data: 'items', name: 'items' },
                     { data: 'amount_fmt', name: 'amount' },
+                    { data: 'tracking', name: 'tracking', orderable: false, searchable: false },
                     { data: 'status', name: 'status' },
                     { data: 'action', name: 'action', orderable: false, searchable: false }
                 ],

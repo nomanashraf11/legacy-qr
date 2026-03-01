@@ -20,8 +20,8 @@
                                         <h5 class="card-title mb-1">Invoice #{{ substr($order->uuid, 0, 8) }}</h5>
                                         <p class="text-muted small mb-0">{{ $order->created_at ? $order->created_at->format('M j, Y') : '—' }}</p>
                                     </div>
-                                    <span class="badge {{ $order->status == 1 ? 'bg-success' : 'bg-warning text-dark' }}">
-                                        {{ $order->status == 1 ? 'Delivered' : 'Pending' }}
+                                    <span class="badge {{ $order->status == 2 ? 'bg-success' : ($order->status == 1 ? 'bg-info' : 'bg-warning text-dark') }}">
+                                        {{ $order->status == 2 ? 'Delivered' : ($order->status == 1 ? 'In Progress' : 'Pending') }}
                                     </span>
                                 </div>
                                 <p class="text-muted small mb-2">
@@ -31,6 +31,11 @@
                                         {{ $order->qr_codes }} QR Codes
                                     @endif
                                 </p>
+                                @if($order->tracking_id)
+                                <p class="small mb-0 text-primary">
+                                    <i class="uil uil-truck me-1"></i>{{ $order->shipping_carrier ?? 'Tracking' }}: {{ $order->tracking_id }}
+                                </p>
+                                @endif
                                 <p class="fw-bold fs-5 text-primary mb-4">${{ number_format($order->amount, 2) }}</p>
                                 <div class="d-flex gap-2">
                                     <a href="{{ route('orderDetails', $order->uuid) }}" class="btn btn-sm btn-outline-primary flex-grow-1">View Order</a>

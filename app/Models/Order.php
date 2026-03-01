@@ -8,10 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
+
+    const STATUS_PENDING = 0;
+    const STATUS_IN_PROGRESS = 1;
+    const STATUS_DELIVERED = 2;
+
+    const CARRIERS = ['USPS', 'UPS', 'FedEx'];
+
     protected $fillable = [
         'uuid',
         'tracking_id',
         'tracking_details',
+        'shipping_carrier',
         'qr_codes',
         'amount',
         'status',

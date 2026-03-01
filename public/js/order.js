@@ -85,10 +85,12 @@ $(function () {
             url: "/get_tracking_details/" + orderId,
             type: "GET",
             success: function (response) {
-                console.log(response);
                 $("#trackingModal #tracking_id").val(response.tracking_id);
                 $("#trackingModal #tracking_details").val(
                     response.tracking_details
+                );
+                $("#trackingModal #shipping_carrier").val(
+                    response.shipping_carrier || ""
                 );
                 $("#trackingModal").modal("show");
             },

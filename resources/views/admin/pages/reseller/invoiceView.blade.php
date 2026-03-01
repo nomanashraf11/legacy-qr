@@ -37,7 +37,7 @@
         <div class="invoice-meta">
             <p><strong>Invoice #</strong> {{ substr($order->uuid, 0, 8) }}</p>
             <p><strong>Date</strong> {{ $order->created_at ? $order->created_at->format('F j, Y') : '—' }}</p>
-            <p><strong>Status</strong> {{ $order->status == 1 ? 'Delivered' : 'Pending' }}</p>
+            <p><strong>Status</strong> {{ $order->status == 2 ? 'Delivered' : ($order->status == 1 ? 'In Progress' : 'Pending') }}</p>
         </div>
     </div>
 
@@ -94,8 +94,13 @@
     @if($order->tracking_id || $order->tracking_details)
     <div class="section">
         <h3>Shipping</h3>
-        <p>Tracking ID: {{ $order->tracking_id ?? '—' }}</p>
-        <p>Status: {{ $order->tracking_details ?? '—' }}</p>
+        @if($order->shipping_carrier)
+        <p><strong>Carrier:</strong> {{ $order->shipping_carrier }}</p>
+        @endif
+        <p><strong>Tracking ID:</strong> {{ $order->tracking_id ?? '—' }}</p>
+        @if($order->tracking_details)
+        <p><strong>Notes:</strong> {{ $order->tracking_details }}</p>
+        @endif
     </div>
     @endif
 

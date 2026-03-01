@@ -2,13 +2,16 @@
 @section('title', 'Order Shipped')
 @section('heading', 'Order Shipped')
 @section('body')
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0 0 16px;">Hello {{ $data['userName'] }},</p>
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0 0 16px;">Your order <strong>#{{ $data['orderNumber'] }}</strong> is now in transit.</p>
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0 0 8px;"><strong>Tracking ID:</strong></p>
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0 0 16px;">{{ $data['tracking'] ?? '—' }}</p>
-    @if(!empty($data['trackingDetails']))
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0 0 8px;"><strong>Details:</strong></p>
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0 0 24px;">{{ $data['trackingDetails'] }}</p>
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 16px;">Hello {{ $data['userName'] }},</p>
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 16px;">Your order <strong>#{{ $data['orderNumber'] }}</strong> has been shipped and is on its way.</p>
+    @if(!empty($data['shippingCarrier']))
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 8px;"><strong>Carrier:</strong> {{ $data['shippingCarrier'] }}</p>
     @endif
-    <p style="font-size:16px;line-height:1.6;color:#e5e5e5;margin:0;">Thank you for your business.</p>
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 8px;"><strong>Tracking ID:</strong></p>
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 16px;font-family:monospace;background:#f3f4f6;padding:12px;border-radius:6px;">{{ $data['tracking'] ?? '—' }}</p>
+    @if(!empty($data['trackingDetails']))
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 8px;"><strong>Notes:</strong></p>
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0 0 24px;">{{ $data['trackingDetails'] }}</p>
+    @endif
+    <p style="font-size:16px;line-height:1.6;color:#4b5563;margin:0;">Thank you for your business.</p>
 @endsection

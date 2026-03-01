@@ -31,7 +31,7 @@ class OrderController extends Controller
                     ->addColumn('action', function ($row) {
                         $viewOrder = route('orderDetails', $row->uuid);
                         $btn = '<a href="' . $viewOrder . '" class="me-2" title="View / Dispatch"><i class="mdi mdi-eye fs-4"></i></a>';
-                        if ($row->status == 0) {
+                        if ($row->status == Order::STATUS_PENDING || $row->status == Order::STATUS_IN_PROGRESS) {
                             $btn .= '<i class="changeStatusButton uil uil-truck text-primary fs-4" style="cursor:pointer;" title="Mark Delivered" id="' . $row->uuid . '"></i>';
                         }
                         return $btn;
@@ -53,8 +53,11 @@ class OrderController extends Controller
                         return '$' . number_format($row->amount, 2);
                     })
                     ->addColumn('status', function ($row) {
-                        if ($row->status == 0) {
+                        if ($row->status == Order::STATUS_PENDING) {
                             return '<span class="badge bg-warning">Pending</span>';
+                        }
+                        if ($row->status == Order::STATUS_IN_PROGRESS) {
+                            return '<span class="badge bg-info">In Progress</span>';
                         }
                         return '<span class="badge bg-success">Delivered</span>';
                     })
@@ -85,6 +88,8 @@ class OrderController extends Controller
             $data = [
                 'userName' => $order->reSeller->user->name,
                 'orderNumber' => substr($order->uuid, 0, 8),
+                'invoiceUrl' => url()->route('order.invoice.view', $order->uuid),
+                'portalUrl' => url()->route('reseller.invoices'),
             ];
             Mail::to($order->reSeller->user->email)->send(new OrderAcceptedMail($data));
 
@@ -107,7 +112,7 @@ class OrderController extends Controller
             $order = Order::where('uuid', $uuid)->firstorfail();
             $order->update([
                 'id' => $order->id,
-                'status' => 1,
+                'status' => Order::STATUS_DELIVERED,
             ]);
             DB::commit();
             $data = [
@@ -144,23 +149,28 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
             $order = Order::where('uuid', $uuid)->firstOrFail();
-            $hadTracking = !empty($order->tracking_id);
             $order->update([
                 'tracking_id' => $request->tracking_id,
                 'tracking_details' => $request->tracking_details,
+                'shipping_carrier' => $request->shipping_carrier,
             ]);
-            DB::commit();
 
-            if (!empty($request->tracking_id) && !$order->shipping_email_sent) {
-                $order->update(['shipping_email_sent' => true]);
-                $data = [
-                    'userName' => $order->reSeller->user->name,
-                    'orderNumber' => substr($order->uuid, 0, 8),
-                    'tracking' => $order->tracking_id,
-                    'trackingDetails' => $order->tracking_details,
-                ];
-                Mail::to($order->reSeller->user->email)->send(new OrderShippedMail($data));
+            // When tracking is added, set status to In Progress and send email
+            if (!empty($request->tracking_id)) {
+                $order->update(['status' => Order::STATUS_IN_PROGRESS]);
+                if (!$order->shipping_email_sent) {
+                    $order->update(['shipping_email_sent' => true]);
+                    $data = [
+                        'userName' => $order->reSeller->user->name,
+                        'orderNumber' => substr($order->uuid, 0, 8),
+                        'tracking' => $order->tracking_id,
+                        'trackingDetails' => $order->tracking_details,
+                        'shippingCarrier' => $order->shipping_carrier,
+                    ];
+                    Mail::to($order->reSeller->user->email)->send(new OrderShippedMail($data));
+                }
             }
+            DB::commit();
 
             return response()->json([
                 'status' => true,
