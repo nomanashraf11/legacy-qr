@@ -121,8 +121,11 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::post('transfer_qr_code_data', [QrCodeController::class, 'transferData'])->name('admin.transfer.data');
 
     Route::get('products', [\App\Http\Controllers\Admin\ProductController::class, 'index'])->name('admin.products');
+    Route::get('products/create', [\App\Http\Controllers\Admin\ProductController::class, 'create'])->name('admin.products.create');
+    Route::post('products', [\App\Http\Controllers\Admin\ProductController::class, 'store'])->name('admin.products.store');
     Route::get('products/{product}/edit', [\App\Http\Controllers\Admin\ProductController::class, 'edit'])->name('admin.products.edit');
     Route::post('products/{product}', [\App\Http\Controllers\Admin\ProductController::class, 'update'])->name('admin.products.update');
+    Route::delete('products/{product}', [\App\Http\Controllers\Admin\ProductController::class, 'destroy'])->name('admin.products.destroy');
     Route::get('orders', [OrderController::class, 'index'])->name('admin.orders');
     Route::post('accept_order/{uuid}', [OrderController::class, 'acceptOrder'])->name('accept.order');
     Route::post('mark_as_delivered/{uuid}', [OrderController::class, 'markAsDelivered'])->name('delivered');
@@ -137,7 +140,6 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::get('reseller-applications/{id}', [UserManagementController::class, 'resellerApplicationDetail'])->name('admin.reseller.application.detail');
     Route::post('reseller-applications/{id}/approve', [UserManagementController::class, 'approveResellerApplication'])->name('admin.reseller.application.approve');
     Route::post('reseller-applications/{id}/reject', [UserManagementController::class, 'rejectResellerApplication'])->name('admin.reseller.application.reject');
-    Route::get('inquiries', [ReviewController::class, 'inquries'])->name('admin.inquries.mail');
     Route::post('reply_mail', [ReviewController::class, 'reply'])->name('admin.mail.reply');
 
     Route::get('settings', [SettingController::class, 'setting'])->name('admin.settings');
