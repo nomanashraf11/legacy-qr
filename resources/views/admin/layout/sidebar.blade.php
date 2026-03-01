@@ -96,13 +96,6 @@
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-title="Inquiry Mails">
-                        <a href="{{ route('admin.inquries.mail') }}" class="side-nav-link">
-                            <i class="uil uil-envelope"></i>
-                            <span>Inquries Mails</span>
-                        </a>
-                    </li>
-                    <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
                         data-bs-title="Reseller Applications">
                         <a href="{{ route('admin.reseller.applications') }}" class="side-nav-link">
                             <i class="ri-user-received-line"></i>
