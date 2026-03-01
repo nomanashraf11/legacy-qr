@@ -140,6 +140,7 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::get('reseller-applications/{id}', [UserManagementController::class, 'resellerApplicationDetail'])->name('admin.reseller.application.detail');
     Route::post('reseller-applications/{id}/approve', [UserManagementController::class, 'approveResellerApplication'])->name('admin.reseller.application.approve');
     Route::post('reseller-applications/{id}/reject', [UserManagementController::class, 'rejectResellerApplication'])->name('admin.reseller.application.reject');
+    Route::get('inquiries', [ReviewController::class, 'inquries'])->name('admin.inquries.mail');
     Route::post('reply_mail', [ReviewController::class, 'reply'])->name('admin.mail.reply');
 
     Route::get('settings', [SettingController::class, 'setting'])->name('admin.settings');

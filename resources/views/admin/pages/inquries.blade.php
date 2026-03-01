@@ -9,7 +9,6 @@
                     <div class="page-title-box">
                         <div class="d-flex align-items-center justify-content-between ">
                             <h4 class="page-title">Inquries Mails</h4>
-                            {{-- <a class="btn btn-primary addSeller">Create Seller Account</a> --}}
                         </div>
                     </div>
                 </div>
@@ -46,28 +45,16 @@
     <script type="text/javascript">
         $(function() {
             $('#inquries_table').DataTable({
-
                 processing: true,
                 serverSide: true,
                 responsive: true,
                 asStripeClasses: false,
                 ajax: "{{ route('admin.inquries.mail') }}",
-                columns: [{
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'email',
-                        name: 'email'
-                    },
-                    {
-                        data: 'subject',
-                        name: 'subject'
-                    },
-                    {
-                        data: 'message',
-                        name: 'message'
-                    },
+                columns: [
+                    { data: 'name', name: 'name' },
+                    { data: 'email', name: 'email' },
+                    { data: 'subject', name: 'subject' },
+                    { data: 'message', name: 'message' },
                 ],
                 pageLength: 10,
                 lengthMenu: [10, 25, 50, 100],

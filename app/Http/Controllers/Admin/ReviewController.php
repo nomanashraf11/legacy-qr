@@ -37,6 +37,21 @@ class ReviewController extends Controller
             return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'something went wrong']);
         }
     }
+    public function inquries(Request $request)
+    {
+        try {
+            if ($request->ajax()) {
+                $data = Inquiry::orderBy('created_at', 'desc');
+                return Datatables::of($data)
+                    ->addIndexColumn()
+                    ->make(true);
+            }
+            return view('admin.pages.inquries');
+        } catch (\Throwable $th) {
+            return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'Something went wrong']);
+        }
+    }
+
     public function contact_mails(Request $request)
     {
         try {
@@ -55,20 +70,6 @@ class ReviewController extends Controller
                     ->make(true);
             }
             return view('admin.pages.contactList');
-        } catch (\Throwable $th) {
-            return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'something went wrong']);
-        }
-    }
-    public function inquries(Request $request)
-    {
-        try {
-            if ($request->ajax()) {
-                $data = Inquiry::all();
-                return Datatables::of($data)
-                    ->addIndexColumn()
-                    ->make(true);
-            }
-            return view('admin.pages.inquries');
         } catch (\Throwable $th) {
             return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'something went wrong']);
         }
