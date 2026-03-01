@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -49,7 +50,7 @@ class ProductCatalogController extends Controller
         if ($redirect = $this->ensureResellerCanPurchase()) {
             return $redirect;
         }
-        $products = Product::where('stock', '>', 0)->get();
+        $products = Product::with('priceTiers')->where('stock', '>', 0)->get();
         $cart = session('reseller_cart', []);
         $cartCount = collect($cart)->sum('quantity');
         return view('admin.pages.reseller.products', compact('products', 'cartCount'));
@@ -63,21 +64,29 @@ class ProductCatalogController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        if ($product->stock < $request->quantity) {
-            return response()->json(['status' => false, 'message' => 'Not enough stock'], 422);
-        }
-
         $cart = session('reseller_cart', []);
         $key = array_search($request->product_id, array_column($cart, 'product_id'));
+        $currentQty = ($key !== false) ? $cart[$key]['quantity'] : 0;
+        $newQty = $currentQty + $request->quantity;
+
+        if ($product->stock < $newQty) {
+            return response()->json([
+                'status' => false,
+                'message' => "Not enough stock. Only {$product->stock} available.",
+            ], 422);
+        }
+
+        $unitPrice = $product->getPriceForQuantity($request->quantity);
 
         if ($key !== false) {
-            $cart[$key]['quantity'] += $request->quantity;
+            $cart[$key]['quantity'] = $newQty;
+            $cart[$key]['price'] = (float) $product->getPriceForQuantity($newQty);
         } else {
             $cart[] = [
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'sku' => $product->sku,
-                'price' => (float) $product->price,
+                'price' => $unitPrice,
                 'quantity' => $request->quantity,
             ];
         }
@@ -117,17 +126,38 @@ class ProductCatalogController extends Controller
         }
 
         $cart = session('reseller_cart', []);
+        $updatedPrice = null;
+        $itemFound = false;
         foreach ($cart as $i => $item) {
             if ($item['product_id'] == $productId) {
+                $itemFound = true;
                 $product = Product::find($productId);
-                if ($product && $product->stock >= $quantity) {
-                    $cart[$i]['quantity'] = $quantity;
+                if (!$product) {
+                    return response()->json(['status' => false, 'message' => 'Product not found'], 404);
                 }
+                if ($product->stock < $quantity) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => "Only {$product->stock} in stock.",
+                        'max_quantity' => $product->stock,
+                    ], 422);
+                }
+                $cart[$i]['quantity'] = $quantity;
+                $cart[$i]['price'] = (float) $product->getPriceForQuantity($quantity);
+                $updatedPrice = $cart[$i]['price'];
                 break;
             }
         }
+        if (!$itemFound) {
+            return response()->json(['status' => false, 'message' => 'Item not in cart'], 404);
+        }
         session(['reseller_cart' => $cart]);
-        return response()->json(['status' => true, 'cart_count' => collect($cart)->sum('quantity')]);
+        return response()->json([
+            'status' => true,
+            'cart_count' => collect($cart)->sum('quantity'),
+            'price' => $updatedPrice,
+            'quantity' => $quantity,
+        ]);
     }
 
     public function removeFromCart(Request $request)
@@ -201,26 +231,43 @@ class ProductCatalogController extends Controller
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Payment was not completed.');
         }
 
+        // Re-validate stock before creating order (may have changed since checkout)
+        foreach ($cart as $item) {
+            $product = Product::find($item['product_id']);
+            if (!$product || $product->stock < $item['quantity']) {
+                return redirect()->route('reseller.cart')->with('status', false)->with('message', "Insufficient stock for {$item['name']}. Please update your cart.");
+            }
+        }
+
         $totalQty = collect($cart)->sum('quantity');
         $totalAmount = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
 
-        $order = Order::create([
-            'uuid' => Str::uuid(),
-            'qr_codes' => $totalQty,
-            'amount' => $totalAmount,
-            'status' => 0,
-            're_seller_id' => Auth::user()->reSeller->id,
-            'tracking_details' => 'Order is pending',
-        ]);
-
-        foreach ($cart as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $item['product_id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
+        DB::beginTransaction();
+        try {
+            $order = Order::create([
+                'uuid' => Str::uuid(),
+                'qr_codes' => $totalQty,
+                'amount' => $totalAmount,
+                'status' => 0,
+                're_seller_id' => Auth::user()->reSeller->id,
+                'tracking_details' => 'Order is pending',
             ]);
-            Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+
+            foreach ($cart as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+                Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Checkout success error: ' . $e->getMessage());
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Order could not be completed. Please try again.');
         }
 
         $adminEmail = config('mail.admin_notification_email');
