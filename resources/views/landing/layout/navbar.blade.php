@@ -1,6 +1,6 @@
 <nav class="navbar" id="navbar">
     <div class="container relative flex flex-wrap items-center justify-between">
-        <a class="navbar-brand md:me-8" href="{{ route('landing') }}">
+        <a class="navbar-brand md:me-8" href="{{ rtrim(config('app.main_site_url'), '/') }}/">
             <img src="{{ asset('assets/landing/assets/images/logo-dark.png') }} "
                 class="inline-block dark:hidden max-w-28" alt="">
             <img src="{{ asset('assets/landing/assets/images/logo-light.png') }} "

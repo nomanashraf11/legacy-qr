@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Living Legacy'),
 
     /*
     |--------------------------------------------------------------------------
@@ -58,6 +58,18 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     'asset_url' => env('ASSET_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Main Site URL (for logo/home links when app is a sub-site)
+    |--------------------------------------------------------------------------
+    |
+    | The main Living Legacy site URL. Used for logo links so users always
+    | navigate to the primary site (e.g. https://livinglegacyqr.com/).
+    |
+    */
+
+    'main_site_url' => env('MAIN_SITE_URL', 'https://livinglegacyqr.com'),
 
     /*
     |--------------------------------------------------------------------------

@@ -107,6 +107,9 @@ class ProductCatalogController extends Controller
         $cart = session('reseller_cart', []);
         $cartItems = collect($cart)->map(function ($item) {
             $item['subtotal'] = $item['price'] * $item['quantity'];
+            $product = Product::with('priceTiers')->find($item['product_id']);
+            $item['price_tiers'] = $product ? $product->priceTiers : collect();
+            $item['is_tiered'] = $product && $product->priceTiers->isNotEmpty();
             return $item;
         });
         $total = $cartItems->sum('subtotal');

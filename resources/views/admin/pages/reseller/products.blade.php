@@ -72,6 +72,9 @@
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-success fw-bold fs-4 product-price" data-tiers="{{ e($tiersJson) }}" data-base="{{ $product->price }}">
                                         ${{ number_format($product->price, 2) }}
+                                        @if($product->priceTiers->isNotEmpty())
+                                            <span class="badge bg-info ms-1">tiered</span>
+                                        @endif
                                     </span>
                                     <span class="text-muted small">{{ $product->stock }} in stock</span>
                                 </div>

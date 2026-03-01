@@ -34,7 +34,7 @@ import { toast } from "react-toastify";
 import { RiFacebookLine, RiTwitterXFill } from "react-icons/ri";
 import { RxInstagramLogo } from "react-icons/rx";
 import { ChangePasswordModal } from "../components/ChangePasswordModal";
-import { API_BASE_URL, BASE_URL, LIVE_URL } from "../config";
+import { API_BASE_URL, BASE_URL, LIVE_URL, MAIN_SITE_URL } from "../config";
 import { useTour } from "@reactour/tour";
 import { dateMMDDYYYYFormat, objectToFormData, textWillWrap } from "../utils";
 import { Spotify } from "react-spotify-embed";
@@ -204,7 +204,7 @@ export const AppLayout = () => {
                             future changes, visit{" "}
                             <a
                                 className={"underline underline-offset-2"}
-                                href={BASE_URL}
+                                href={MAIN_SITE_URL}
                             >
                                 www.livinglegacyqr.com
                             </a>{" "}

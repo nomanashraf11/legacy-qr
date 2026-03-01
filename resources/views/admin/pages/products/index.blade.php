@@ -40,11 +40,19 @@
                                     </div>
                                 </div>
                                 <h5 class="card-title">{{ $product->name }}</h5>
-                                <p class="text-success fw-semibold mb-1">${{ number_format($product->price, 2) }}
+                                <p class="text-success fw-semibold mb-1">
+                                    ${{ number_format($product->price, 2) }}
                                     @if($product->priceTiers->isNotEmpty())
-                                        <small class="text-muted">(tiered)</small>
+                                        <span class="badge bg-info ms-1">tiered</span>
                                     @endif
                                 </p>
+                                @if($product->priceTiers->isNotEmpty())
+                                    <ul class="list-unstyled small text-muted mb-1">
+                                        @foreach($product->priceTiers as $tier)
+                                            <li>{{ $tier->min_quantity }}-{{ $tier->max_quantity >= 999999 ? '∞' : $tier->max_quantity }}: ${{ number_format($tier->price, 2) }}/ea</li>
+                                        @endforeach
+                                    </ul>
+                                @endif
                                 <p class="text-muted small mb-0">{{ $product->stock }} in stock</p>
                             </div>
                         </div>
