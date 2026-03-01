@@ -96,14 +96,14 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="uil uil-check me-1"></i> Save Changes
                                     </button>
-                                    <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="d-inline" onsubmit="return confirm('Delete this product? This cannot be undone.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger">
-                                            <i class="uil uil-trash-alt me-1"></i> Delete Product
-                                        </button>
-                                    </form>
                                 </div>
+                            </form>
+                            <form method="POST" action="{{ route('admin.products.destroy', $product) }}" class="d-inline mt-2" onsubmit="return confirm('Delete this product? This cannot be undone.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="uil uil-trash-alt me-1"></i> Delete Product
+                                </button>
                             </form>
                         </div>
                     </div>
