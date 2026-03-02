@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\Review;
 use Yajra\DataTables\DataTables;
 use App\Models\Contact;
+use App\Models\Inquiry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -58,6 +59,22 @@ class ReviewController extends Controller
             return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'something went wrong']);
         }
     }
+
+    public function inquries(Request $request)
+    {
+        try {
+            if ($request->ajax()) {
+                $data = Inquiry::query()->orderBy('created_at', 'desc');
+                return DataTables::of($data)
+                    ->addIndexColumn()
+                    ->make(true);
+            }
+            return view('admin.pages.inquries');
+        } catch (\Throwable $th) {
+            return redirect(route('admin.batches'))->with(['status' => false, 'message' => 'something went wrong']);
+        }
+    }
+
     public function delete($id)
     {
         try {

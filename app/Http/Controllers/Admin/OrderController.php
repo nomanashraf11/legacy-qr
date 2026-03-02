@@ -43,6 +43,10 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            // When APP_DEBUG=true, rethrow so you see the actual error when testing locally
+            if (config('app.debug')) {
+                throw $e;
+            }
             return false;
         }
     }

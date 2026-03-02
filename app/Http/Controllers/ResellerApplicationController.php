@@ -22,6 +22,7 @@ class ResellerApplicationController extends Controller
 
             $existingUser = User::where('email', $request->email)->first();
             if ($existingUser) {
+                DB::rollBack();
                 return response()->json([
                     'status' => false,
                     'message' => 'This email already has an account. Try another.',
@@ -33,6 +34,7 @@ class ResellerApplicationController extends Controller
                 ->first();
 
             if ($existing) {
+                DB::rollBack();
                 return response()->json([
                     'status' => false,
                     'message' => 'You have already submitted an application. We will be in touch shortly.',
@@ -57,10 +59,14 @@ class ResellerApplicationController extends Controller
                 'additional_notes' => $request->additional_notes ?: null,
             ]);
 
-            $data = [
-                'userName' => $request->full_name,
-            ];
-            Mail::to($request->email)->send(new ThankyouMail($data));
+            DB::commit();
+
+            $data = ['userName' => $request->full_name];
+            try {
+                Mail::to($request->email)->send(new ThankyouMail($data));
+            } catch (\Throwable $e) {
+                \Log::warning('Thank-you email failed: ' . $e->getMessage());
+            }
 
             $adminEmail = config('mail.admin_notification_email');
             if ($adminEmail) {
@@ -76,8 +82,6 @@ class ResellerApplicationController extends Controller
                     \Log::warning('Admin new reseller notification failed: ' . $e->getMessage());
                 }
             }
-
-            DB::commit();
 
             return response()->json([
                 'status' => true,

@@ -102,6 +102,20 @@
                             <span>Reseller Applications</span>
                         </a>
                     </li>
+                    <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-title="Contact Mails">
+                        <a href="{{ route('admin.contact.mail') }}" class="side-nav-link">
+                            <i class="mdi mdi-email-outline"></i>
+                            <span>Contact Mails</span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
+                        data-bs-title="Inquiries">
+                        <a href="{{ route('admin.inquries.mail') }}" class="side-nav-link">
+                            <i class="mdi mdi-message-text-outline"></i>
+                            <span>Inquiries</span>
+                        </a>
+                    </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Reviews">
                         <a href="{{ route('admin.reviews') }}" class="side-nav-link">
                             <i class=" ri-user-heart-line"></i>

@@ -142,6 +142,8 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::post('reseller-applications/{id}/reject', [UserManagementController::class, 'rejectResellerApplication'])->name('admin.reseller.application.reject');
     Route::post('reseller-applications/{id}/delete', [UserManagementController::class, 'deleteResellerApplication'])->name('admin.reseller.application.delete');
     Route::post('reply_mail', [ReviewController::class, 'reply'])->name('admin.mail.reply');
+    Route::get('re-sellers-request', [ReviewController::class, 'contact_mails'])->name('admin.contact.mail');
+    Route::get('inquiries', [ReviewController::class, 'inquries'])->name('admin.inquries.mail');
 
     Route::get('settings', [SettingController::class, 'setting'])->name('admin.settings');
     Route::post('update_details', [SettingController::class, 'updateDetails'])->name('update.details');

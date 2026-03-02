@@ -124,20 +124,27 @@ class DashboardController extends Controller
                 're_seller_id' => Auth::user()->reSeller->id,
                 'tracking_details' => 'Order is pending'
             ]);
+            DB::commit();
+
             $data = [
                 'userName' => Auth::user()->name,
                 'qr_codes' => $order->qr_codes,
                 'amount' => $order->amount,
             ];
-            Mail::to(Auth::user()->email)->send(new QrPurchaseMail($data));
-            DB::commit();
+            try {
+                Mail::to(Auth::user()->email)->send(new QrPurchaseMail($data));
+            } catch (\Throwable $e) {
+                \Log::warning('QR purchase email failed: ' . $e->getMessage());
+            }
+
             return redirect(route('myOrders'))->with([
                 'status' => true,
                 'message' => 'Order Placed successfully'
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            dd($th->getMessage());
+            \Log::error('Stripe checkout success error: ' . $th->getMessage());
+            return redirect()->back()->with('status', false)->with('message', 'Order could not be completed. Please try again.');
         }
     }
     public function myOrders(Request $request)

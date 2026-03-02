@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Sellar;
 
 use App\Http\Controllers\Controller;
 use App\Mail\AdminNewOrderMail;
+use App\Mail\OrderPlacedMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -271,6 +272,17 @@ class ProductCatalogController extends Controller
             DB::rollBack();
             \Log::error('Checkout success error: ' . $e->getMessage());
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Order could not be completed. Please try again.');
+        }
+
+        try {
+            Mail::to(Auth::user()->email)->send(new OrderPlacedMail([
+                'userName' => Auth::user()->name,
+                'orderNumber' => substr($order->uuid, 0, 8),
+                'items' => $totalQty . ' item(s)',
+                'amount' => number_format($totalAmount, 2),
+            ]));
+        } catch (\Throwable $e) {
+            \Log::warning('Order placed email failed: ' . $e->getMessage());
         }
 
         $adminEmail = config('mail.admin_notification_email');
