@@ -77,6 +77,24 @@ server {
         deny all;
     }
 }
+
+# React SPA fallback - use this server block when hosting the React app
+# (e.g. qr.livinglegacyqr.com or legacy.livinglegacyqr.com) on the same server.
+# Ensures /uuid/legacy and other SPA routes serve index.html instead of 404
+# on both mobile and desktop (fixes mobile 404 issue).
+#
+# server {
+#     listen 80;
+#     server_name qr.livinglegacyqr.com legacy.livinglegacyqr.com;
+#     root /var/www/living-legacy-qr/public;
+#     index index.html;
+#     location / {
+#         try_files $uri $uri/ /index.html;
+#     }
+#     location /assets {
+#         try_files $uri =404;
+#     }
+# }
 EOF
 
 # Test Nginx configuration

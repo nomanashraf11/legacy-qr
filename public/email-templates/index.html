@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Living Legacy – Email Template Review</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: system-ui, -apple-system, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 40px 24px;
+                background: #f5f7fa;
+            }
+            h1 {
+                color: #1a365d;
+                margin-bottom: 8px;
+            }
+            .subtitle {
+                color: #6b7280;
+                margin-bottom: 32px;
+            }
+            .card {
+                background: #fff;
+                border-radius: 12px;
+                padding: 24px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            }
+            .card h2 {
+                font-size: 18px;
+                margin: 0 0 8px;
+                color: #1a365d;
+            }
+            .card p {
+                margin: 0 0 12px;
+                color: #4b5563;
+                font-size: 14px;
+            }
+            .card a {
+                display: inline-block;
+                padding: 8px 16px;
+                background: #0f66a9;
+                color: #fff !important;
+                text-decoration: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+            }
+            .card a:hover {
+                background: #0d5a94;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Email Template Review</h1>
+        <p class="subtitle">Living Legacy – Preview all transactional emails</p>
+
+        <div class="card">
+            <h2>Order Shipment</h2>
+            <p>
+                Sent when admin adds carrier + tracking (In Progress) or marks
+                order as delivered. Includes carrier name, tracking ID, and
+                notes.
+            </p>
+            <a href="order-in-delivery-preview.html">View full preview</a>
+            &nbsp;
+            <a href="order-in-delivery-preview-minimal.html"
+                >View minimal (no notes)</a
+            >
+        </div>
+
+        <div class="card">
+            <h2>Order Accepted</h2>
+            <p>
+                Sent when admin accepts a new order. Includes order number,
+                invoice link, and portal link.
+            </p>
+            <a href="order-accepted-preview.html">View preview</a>
+        </div>
+
+        <div class="card">
+            <h2>Reseller Invitation</h2>
+            <p>
+                Sent when admin approves a reseller application. Includes login
+                link.
+            </p>
+            <a href="reseller-invitation-preview.html">View preview</a>
+        </div>
+
+        <div class="card">
+            <h2>Account Created</h2>
+            <p>
+                Sent when admin creates a reseller account. Includes login
+                credentials.
+            </p>
+            <a href="account-created-preview.html">View preview</a>
+        </div>
+    </body>
+</html>
