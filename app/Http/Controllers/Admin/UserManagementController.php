@@ -382,6 +382,7 @@ class UserManagementController extends Controller
             try {
                 Mail::to($user->email)->send(new ResellerInvitationMail([
                     'name' => $user->name,
+                    'business_name' => $app->business_name,
                     'loginLink' => $loginLink,
                 ]));
                 \Log::info('Reseller invitation email sent', ['email' => $user->email]);

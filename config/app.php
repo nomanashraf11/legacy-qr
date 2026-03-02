@@ -71,7 +71,7 @@ return [
 
     'main_site_url' => env('MAIN_SITE_URL', 'https://livinglegacyqr.com'),
 
-    'mail_logo_url' => env('MAIL_LOGO_URL', 'https://res.cloudinary.com/djjd5w5dw/image/upload/v1757955293/logocentered_e0clto.png'),
+    'mail_logo_url' => \App\Constants\MailConstants::LOGO_URL,
 
     /*
     |--------------------------------------------------------------------------

@@ -10,10 +10,42 @@ use App\Models\ReSeller;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
+    /**
+     * Send order notification email. Logs config, attempt, and any failure.
+     * Does not throw - API response is not broken by mail failures.
+     */
+    private function sendOrderMail(string $type, string $recipientEmail, $mailable): bool
+    {
+        try {
+            $mailer = config('mail.default');
+            $logContext = [
+                'type' => $type,
+                'recipient' => $recipientEmail,
+                'mailer' => $mailer,
+            ];
+            if ($mailer === 'smtp') {
+                $logContext['host'] = config('mail.mailers.smtp.host') ?? 'N/A';
+                $logContext['port'] = config('mail.mailers.smtp.port') ?? 'N/A';
+            }
+            Log::info('Order email: attempting to send', $logContext);
+            Mail::to($recipientEmail)->send($mailable);
+            Log::info('Order email: sent successfully', ['type' => $type, 'recipient' => $recipientEmail]);
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Order email: failed to send', [
+                'type' => $type,
+                'recipient' => $recipientEmail,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return false;
+        }
+    }
     public function index(Request $request)
     {
         try {
@@ -70,7 +102,7 @@ class OrderController extends Controller
 
             return view('admin.pages.orderList');
         } catch (\Throwable $th) {
-            dd($th->getMessage());
+            Log::error('Order list failed', ['error' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
             return redirect(route('admin.home'))->with(['status' => false, 'message' => 'Something went wrong']);
         }
     }
@@ -96,13 +128,17 @@ class OrderController extends Controller
                 'portalUrl' => url()->route('reseller.invoices'),
                 'order' => $order,
             ];
-            Mail::to($order->reSeller->user->email)->send(new OrderAcceptedMail($data));
+            $mailSent = $this->sendOrderMail('order_accepted', $order->reSeller->user->email, new OrderAcceptedMail($data));
 
             return response()->json([
                 'status' => true,
-                'message' => 'Order accepted. Reseller notified.',
+                'message' => $mailSent ? 'Order accepted. Reseller notified.' : 'Order accepted. Notification email could not be sent (see logs).',
             ]);
         } catch (\Throwable $th) {
+            Log::error('Order accept failed', ['uuid' => $uuid, 'error' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
@@ -114,12 +150,14 @@ class OrderController extends Controller
     {
         try {
             DB::beginTransaction();
-            $order = Order::where('uuid', $uuid)->firstorfail();
+            $order = Order::where('uuid', $uuid)->firstOrFail();
             $order->update([
                 'id' => $order->id,
                 'status' => Order::STATUS_DELIVERED,
             ]);
             DB::commit();
+
+            $order->load('reSeller.user');
             $data = [
                 'userName' => $order->reSeller->user->name,
                 'orderNumber' => substr($order->uuid, 0, 8),
@@ -127,12 +165,17 @@ class OrderController extends Controller
                 'trackingDetails' => $order->tracking_details,
                 'shippingCarrier' => $order->shipping_carrier,
             ];
-            Mail::to($order->reSeller->user->email)->send(new OrderShippedMail($data));
+            $mailSent = $this->sendOrderMail('order_delivered', $order->reSeller->user->email, new OrderShippedMail($data));
+
             return response()->json([
                 'status' => true,
-                'message' => 'Marked as Delivered'
+                'message' => $mailSent ? 'Marked as Delivered' : 'Marked as Delivered. Notification email could not be sent (see logs).',
             ]);
         } catch (\Throwable $th) {
+            Log::error('Order mark as delivered failed', ['uuid' => $uuid, 'error' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong'
@@ -162,28 +205,40 @@ class OrderController extends Controller
                 'shipping_carrier' => $request->shipping_carrier,
             ]);
 
-            // When tracking is added, set status to In Progress and send email
+            $shouldSendShippingEmail = false;
+            $shippingEmailData = null;
+
             if (!empty($request->tracking_id)) {
                 $order->update(['status' => Order::STATUS_IN_PROGRESS]);
                 if (!$order->shipping_email_sent) {
                     $order->update(['shipping_email_sent' => true]);
-                    $data = [
+                    $order->load('reSeller.user');
+                    $shouldSendShippingEmail = true;
+                    $shippingEmailData = [
                         'userName' => $order->reSeller->user->name,
                         'orderNumber' => substr($order->uuid, 0, 8),
                         'tracking' => $order->tracking_id,
                         'trackingDetails' => $order->tracking_details,
                         'shippingCarrier' => $order->shipping_carrier,
                     ];
-                    Mail::to($order->reSeller->user->email)->send(new OrderShippedMail($data));
                 }
             }
             DB::commit();
+
+            // Send shipping email AFTER commit so mail failure does not rollback DB
+            if ($shouldSendShippingEmail && $shippingEmailData) {
+                $this->sendOrderMail('order_shipped', $order->reSeller->user->email, new OrderShippedMail($shippingEmailData));
+            }
 
             return response()->json([
                 'status' => true,
                 'message' => 'Updated Successfully',
             ]);
         } catch (\Throwable $th) {
+            Log::error('Order tracking update failed', ['uuid' => $uuid, 'error' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong',
