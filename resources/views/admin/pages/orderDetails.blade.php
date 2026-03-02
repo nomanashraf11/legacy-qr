@@ -75,13 +75,16 @@
                                             <button type="button" class="btn btn-primary acceptOrderButton" id="{{ $order->uuid }}">
                                                 <i class="uil uil-check-circle me-1"></i>Accept Order
                                             </button>
+                                        @else
+                                            <button type="button" class="btn btn-outline-primary changeTrackingDetails" id="{{ $order->uuid }}">
+                                                <i class="uil uil-truck me-1"></i>Add Shipping Info
+                                            </button>
+                                            @if($order->status == \App\Models\Order::STATUS_IN_PROGRESS)
+                                                <button type="button" class="btn btn-success changeStatusButton" id="{{ $order->uuid }}">
+                                                    <i class="uil uil-check me-1"></i>Mark as Delivered
+                                                </button>
+                                            @endif
                                         @endif
-                                        <button type="button" class="btn btn-outline-primary changeTrackingDetails" id="{{ $order->uuid }}">
-                                            <i class="uil uil-truck me-1"></i>Add Shipping Info
-                                        </button>
-                                        <button type="button" class="btn btn-success changeStatusButton" id="{{ $order->uuid }}">
-                                            <i class="uil uil-check me-1"></i>Mark as Delivered
-                                        </button>
                                     @endif
                                     @endrole
                                 </div>

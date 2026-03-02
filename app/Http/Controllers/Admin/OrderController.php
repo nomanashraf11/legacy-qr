@@ -44,10 +44,6 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            // When APP_DEBUG=true, rethrow so you see the actual error when testing locally
-            if (config('app.debug')) {
-                throw $e;
-            }
             return false;
         }
     }
@@ -70,9 +66,11 @@ class OrderController extends Controller
                         if (!$row->accepted_at) {
                             $btn .= '<span class="d-inline-block me-2 order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Accept order and send confirmation email"><i class="acceptOrderButton uil uil-check-circle text-success fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
                         }
-                        if ($row->status == Order::STATUS_PENDING || $row->status == Order::STATUS_IN_PROGRESS) {
-                            $btn .= '<span class="d-inline-block me-2 order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add / Edit shipping & tracking"><i class="changeTrackingDetails uil uil-package text-info fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
-                            $btn .= '<span class="d-inline-block order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as delivered"><i class="changeStatusButton uil uil-truck text-primary fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
+                        if ($row->accepted_at && ($row->status == Order::STATUS_PENDING || $row->status == Order::STATUS_IN_PROGRESS)) {
+                            $btn .= '<span class="d-inline-block me-2 order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add / Edit shipping & tracking (required before marking delivered)"><i class="changeTrackingDetails uil uil-package text-info fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
+                            if ($row->status == Order::STATUS_IN_PROGRESS) {
+                                $btn .= '<span class="d-inline-block order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as delivered"><i class="changeStatusButton uil uil-truck text-primary fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
+                            }
                         }
                         return $btn;
                     })
@@ -156,18 +154,37 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
             $order = Order::where('uuid', $uuid)->firstOrFail();
-            $order->update([
-                'id' => $order->id,
-                'status' => Order::STATUS_DELIVERED,
-            ]);
+
+            if (!$order->accepted_at) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please accept the order first.',
+                ]);
+            }
+            if ($order->status != Order::STATUS_IN_PROGRESS) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please add shipping/tracking info first to move the order to In Progress.',
+                ]);
+            }
+
+            $order->update(['status' => Order::STATUS_DELIVERED]);
             DB::commit();
 
             $order->load('reSeller.user');
-            $data = [
-                'userName' => $order->reSeller->user->name,
-                'orderNumber' => $order->id,
-            ];
-            $mailSent = $this->sendOrderMail('order_delivered', $order->reSeller->user->email, new OrderDeliveredMail($data));
+            $recipientEmail = $order->reSeller && $order->reSeller->user
+                ? $order->reSeller->user->email
+                : null;
+            $mailSent = false;
+            if ($recipientEmail) {
+                $data = [
+                    'userName' => $order->reSeller->user->name,
+                    'orderNumber' => $order->id,
+                ];
+                $mailSent = $this->sendOrderMail('order_delivered', $recipientEmail, new OrderDeliveredMail($data));
+            } else {
+                Log::warning('Order delivered: no reseller/user email found, skipping notification', ['order_uuid' => $uuid]);
+            }
 
             return response()->json([
                 'status' => true,
@@ -201,6 +218,14 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
             $order = Order::where('uuid', $uuid)->firstOrFail();
+
+            if (!$order->accepted_at) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please accept the order first before adding tracking.',
+                ]);
+            }
+
             $order->update([
                 'tracking_id' => $request->tracking_id,
                 'tracking_details' => $request->tracking_details,
