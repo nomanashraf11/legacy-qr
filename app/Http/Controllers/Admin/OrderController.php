@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OrderAcceptedMail;
+use App\Mail\OrderDeliveredMail;
 use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Models\ReSeller;
@@ -58,7 +59,7 @@ class OrderController extends Controller
                 return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('order_number', function ($row) {
-                        return '<span class="text-muted small">#' . substr($row->uuid, 0, 8) . '</span>';
+                        return '<span class="text-muted small">#' . $row->id . '</span>';
                     })
                     ->addColumn('order_date', function ($row) {
                         return $row->created_at ? $row->created_at->format('M j, Y') : '—';
@@ -127,7 +128,7 @@ class OrderController extends Controller
             $order->load(['orderItems.product', 'reSeller.user']);
             $data = [
                 'userName' => $order->reSeller->user->name,
-                'orderNumber' => substr($order->uuid, 0, 8),
+                'orderNumber' => $order->id,
                 'invoiceUrl' => url()->route('order.invoice.view', $order->uuid),
                 'portalUrl' => url()->route('reseller.invoices'),
                 'order' => $order,
@@ -164,12 +165,9 @@ class OrderController extends Controller
             $order->load('reSeller.user');
             $data = [
                 'userName' => $order->reSeller->user->name,
-                'orderNumber' => substr($order->uuid, 0, 8),
-                'tracking' => $order->tracking_id,
-                'trackingDetails' => $order->tracking_details,
-                'shippingCarrier' => $order->shipping_carrier,
+                'orderNumber' => $order->id,
             ];
-            $mailSent = $this->sendOrderMail('order_delivered', $order->reSeller->user->email, new OrderShippedMail($data));
+            $mailSent = $this->sendOrderMail('order_delivered', $order->reSeller->user->email, new OrderDeliveredMail($data));
 
             return response()->json([
                 'status' => true,
@@ -220,7 +218,7 @@ class OrderController extends Controller
                     $shouldSendShippingEmail = true;
                     $shippingEmailData = [
                         'userName' => $order->reSeller->user->name,
-                        'orderNumber' => substr($order->uuid, 0, 8),
+                        'orderNumber' => $order->id,
                         'tracking' => $order->tracking_id,
                         'trackingDetails' => $order->tracking_details,
                         'shippingCarrier' => $order->shipping_carrier,

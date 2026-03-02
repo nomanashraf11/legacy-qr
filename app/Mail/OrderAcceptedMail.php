@@ -42,7 +42,7 @@ class OrderAcceptedMail extends Mailable
 
         if (!empty($this->data['order']) && $this->data['order'] instanceof Order) {
             $order = $this->data['order'];
-            $orderNumber = substr($order->uuid, 0, 8);
+            $orderNumber = $order->id;
             try {
                 // Generate PDF eagerly so we catch errors here; lazy closure would throw during send
                 $pdf = Pdf::loadView('admin.pages.reseller.invoiceView', compact('order'));

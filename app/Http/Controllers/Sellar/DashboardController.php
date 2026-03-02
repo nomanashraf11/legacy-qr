@@ -156,7 +156,7 @@ class DashboardController extends Controller
                 return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('order_number', function ($row) {
-                        return '#' . substr($row->uuid, 0, 8);
+                        return '#' . $row->id;
                     })
                     ->addColumn('order_date', function ($row) {
                         return $row->created_at ? $row->created_at->format('M j, Y') : '—';

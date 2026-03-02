@@ -17,7 +17,7 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <div>
-                                        <h5 class="card-title mb-1">Invoice #{{ substr($order->uuid, 0, 8) }}</h5>
+                                        <h5 class="card-title mb-1">Invoice #{{ $order->id }}</h5>
                                         <p class="text-muted small mb-0">{{ $order->created_at ? $order->created_at->format('M j, Y') : '—' }}</p>
                                     </div>
                                     <span class="badge {{ $order->status == 2 ? 'bg-success' : ($order->status == 1 ? 'bg-info' : 'bg-warning text-dark') }}">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice #{{ substr($order->uuid, 0, 8) }} - Living Legacy</title>
+    <title>Invoice #{{ $order->id }} - Living Legacy</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; color: #333; max-width: 800px; margin: 0 auto; padding: 24px; }
@@ -35,7 +35,7 @@
             <p>Invoice</p>
         </div>
         <div class="invoice-meta">
-            <p><strong>Invoice #</strong> {{ substr($order->uuid, 0, 8) }}</p>
+            <p><strong>Invoice #</strong> {{ $order->id }}</p>
             <p><strong>Date</strong> {{ $order->created_at ? $order->created_at->format('F j, Y') : '—' }}</p>
             <p><strong>Status</strong> {{ $order->status == 2 ? 'Delivered' : ($order->status == 1 ? 'In Progress' : 'Pending') }}</p>
         </div>

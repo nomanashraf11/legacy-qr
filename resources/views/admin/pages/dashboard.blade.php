@@ -129,7 +129,7 @@
                                                 @endphp
                                                 <tr>
                                                     <td>
-                                                        <a href="{{ route('orderDetails', $order->uuid) }}" class="text-decoration-none text-body fw-medium">#{{ substr($order->uuid, 0, 8) }}</a>
+                                                        <a href="{{ route('orderDetails', $order->uuid) }}" class="text-decoration-none text-body fw-medium">#{{ $order->id }}</a>
                                                         <br><span class="text-muted small">{{ $order->created_at->format('M j, Y') }}</span>
                                                     </td>
                                                     <td class="text-end">

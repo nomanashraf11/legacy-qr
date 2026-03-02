@@ -277,7 +277,7 @@ class ProductCatalogController extends Controller
         try {
             Mail::to(Auth::user()->email)->send(new OrderPlacedMail([
                 'userName' => Auth::user()->name,
-                'orderNumber' => substr($order->uuid, 0, 8),
+                'orderNumber' => $order->id,
                 'items' => $totalQty . ' item(s)',
                 'amount' => number_format($totalAmount, 2),
             ]));
@@ -289,7 +289,7 @@ class ProductCatalogController extends Controller
         if ($adminEmail) {
             try {
                 Mail::to($adminEmail)->send(new AdminNewOrderMail([
-                    'orderNumber' => substr($order->uuid, 0, 8),
+                    'orderNumber' => $order->id,
                     'resellerName' => Auth::user()->name,
                     'items' => $totalQty . ' item(s)',
                     'amount' => number_format($totalAmount, 2),
