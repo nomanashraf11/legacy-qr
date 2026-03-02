@@ -23,7 +23,7 @@ class OrderShippedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Shipped – Living Legacy',
+            subject: 'Order Shipment – Living Legacy',
         );
     }
 

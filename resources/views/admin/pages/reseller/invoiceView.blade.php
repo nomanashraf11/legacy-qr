@@ -91,13 +91,15 @@
         </table>
     </div>
 
-    @if($order->tracking_id || $order->tracking_details)
+    @if($order->shipping_carrier || $order->tracking_id || $order->tracking_details)
     <div class="section">
         <h3>Shipping</h3>
         @if($order->shipping_carrier)
         <p><strong>Carrier:</strong> {{ $order->shipping_carrier }}</p>
         @endif
-        <p><strong>Tracking ID:</strong> {{ $order->tracking_id ?? '—' }}</p>
+        @if($order->tracking_id)
+        <p><strong>Tracking ID:</strong> {{ $order->tracking_id }}</p>
+        @endif
         @if($order->tracking_details)
         <p><strong>Notes:</strong> {{ $order->tracking_details }}</p>
         @endif

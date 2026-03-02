@@ -160,8 +160,10 @@
 
 </head>
 
-<body class="font-libre_franklin text-base overflow-x-hidden text-black dark:text-white bg-white dark:bg-slate-900">
-    @include('landing.layout.navbar')
+<body class="font-libre_franklin text-base overflow-x-hidden text-black dark:text-white bg-white dark:bg-slate-900 @if(request()->routeIs('reseller.view')) !bg-black @endif">
+    @if(!request()->routeIs('reseller.view'))
+        @include('landing.layout.navbar')
+    @endif
     @yield('content')
     @include('landing.layout.footer')
 

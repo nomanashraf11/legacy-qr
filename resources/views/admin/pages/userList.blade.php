@@ -44,6 +44,7 @@
         </div>
     </div>
     @include('admin.pages.modals.banUser')
+    @include('admin.pages.modals.deleteUser')
 @endsection
 @push('scripts')
     <script src="{{ asset('js/user.js') }}"></script>

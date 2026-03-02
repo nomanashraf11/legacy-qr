@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\ChangePasswordRequest;
 use App\Http\Requests\QrDataRequest;
+use App\Http\Requests\ResellerSettingsRequest;
 use App\Models\Admin;
 use App\Models\ReSeller;
 use App\Models\User;
@@ -128,28 +129,36 @@ class SettingController extends Controller
             ]);
         }
     }
-    public function sellerUpdateDetails(Request $request)
+    public function sellerUpdateDetails(ResellerSettingsRequest $request)
     {
         try {
             DB::beginTransaction();
             $user = Auth::user();
             $reSeller = $user->reSeller;
 
+            $shippingAddress = implode(', ', array_filter([
+                $request->street_address,
+                $request->city,
+                trim($request->state . ' ' . $request->postal_code),
+            ]));
+
             $user->update([
                 'id' => $user->id,
                 'name' => $request->name,
+                'email' => $request->email,
             ]);
             if ($reSeller) {
                 $reSeller->update([
                     'id' => $reSeller->id,
                     'phone' => $request->phone,
-                    'shipping_address' => $request->address,
+                    'shipping_address' => $shippingAddress,
                 ]);
             } else {
                 ReSeller::create([
                     'uuid' => Str::uuid(),
                     'phone' => $request->phone,
-                    'shipping_address' => $request->address,
+                    'shipping_address' => $shippingAddress,
+                    'website' => '',
                     'user_id' => $user->id,
                 ]);
             }
@@ -160,10 +169,9 @@ class SettingController extends Controller
             ]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            dd($th->getMessage());
             return response()->json([
-                'status' => true,
-                'message' => 'Updated Successfully'
+                'status' => false,
+                'message' => $th->getMessage()
             ]);
         }
     }

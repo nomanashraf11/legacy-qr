@@ -37,6 +37,7 @@
         </div>
     </div>
     @include('admin.pages.modals.delivered')
+    @include('admin.pages.modals.editTrackingDetails')
 @endsection
 @push('scripts')
     <script type="text/javascript">
@@ -63,7 +64,15 @@
                     }
                 },
                 drawCallback: function() {
-                    $(" .pagination").addClass("pagination-rounded")
+                    $(".pagination").addClass("pagination-rounded");
+                    // Bootstrap tooltips with fast 150ms delay (native title is ~1s)
+                    document.querySelectorAll('#orders_datatable .order-action-tip[data-bs-toggle="tooltip"]').forEach(function(el) {
+                        if (typeof bootstrap !== 'undefined') {
+                            var t = bootstrap.Tooltip.getInstance(el);
+                            if (t) t.dispose();
+                            new bootstrap.Tooltip(el, { delay: { show: 50, hide: 0 } });
+                        }
+                    });
                 },
                 order: [[1, 'desc']]
             });

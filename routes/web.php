@@ -140,6 +140,7 @@ Route::middleware('auth', 'role:admin', 'verified', config('jetstream.auth_sessi
     Route::get('reseller-applications/{id}', [UserManagementController::class, 'resellerApplicationDetail'])->name('admin.reseller.application.detail');
     Route::post('reseller-applications/{id}/approve', [UserManagementController::class, 'approveResellerApplication'])->name('admin.reseller.application.approve');
     Route::post('reseller-applications/{id}/reject', [UserManagementController::class, 'rejectResellerApplication'])->name('admin.reseller.application.reject');
+    Route::post('reseller-applications/{id}/delete', [UserManagementController::class, 'deleteResellerApplication'])->name('admin.reseller.application.delete');
     Route::post('reply_mail', [ReviewController::class, 'reply'])->name('admin.mail.reply');
 
     Route::get('settings', [SettingController::class, 'setting'])->name('admin.settings');
@@ -178,4 +179,16 @@ Route::prefix('re_sellers')->middleware('auth', 'verified', 'role:re-sellers', '
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| React SPA Fallback - Redirect to main site
+|--------------------------------------------------------------------------
+|
+| When SPA routes (e.g. /uuid/legacy) would 404 (e.g. on mobile), redirect
+| to the main Living Legacy site instead.
+|
+*/
+Route::get('/{path}', function () {
+    return redirect(config('app.main_site_url', 'https://livinglegacyqr.com') . '/');
+})->where('path', '^(my-qrcodes|verify-email|christmas-demo|[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*)$');
 

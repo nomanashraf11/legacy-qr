@@ -291,26 +291,45 @@
 
                             <div class="row my-3">
                                 <div class="col">
-                                    <label for="name">Name</label>
+                                    <label for="nameInput">Name <span class="text-danger">*</span></label>
                                     <input class="form-control" type="text" id="nameInput" name="name"
-                                        value="{{ $user->name }}">
+                                        value="{{ $user->name }}" required>
                                 </div>
                                 <div class="col">
-                                    <label for="name">Email</label>
-                                    <input class="form-control" type="email" id="addressInput" name="email"
-                                        value="{{ $user->email }}">
+                                    <label for="emailInput">Email <span class="text-danger">*</span></label>
+                                    <input class="form-control" type="email" id="emailInput" name="email"
+                                        value="{{ $user->email }}" required>
                                 </div>
                             </div>
                             <div class="row my-3">
                                 <div class="col">
                                     <label for="phoneInput">Phone <span class="text-danger">*</span></label>
-                                    <input class="form-control {{ isset($missingFields['phone']) ? 'border-warning' : '' }}" type="text" id="phoneInput" name="phone"
-                                        value="{{ $user->reSeller?->phone ?? '' }}" placeholder="Required for orders">
+                                    <input class="form-control {{ isset($missingFields['phone']) ? 'border-warning' : '' }}" type="tel" id="phoneInput" name="phone"
+                                        value="{{ $user->reSeller?->phone ?? '' }}" placeholder="e.g. (123) 456-7890 or +1-234-567-8900">
                                 </div>
-                                <div class="col">
-                                    <label for="addressInput">Shipping Address <span class="text-danger">*</span></label>
-                                    <input class="form-control {{ isset($missingFields['address']) ? 'border-warning' : '' }}" type="text" id="addressInput" name="address"
-                                        value="{{ $user->reSeller?->shipping_address ?? '' }}" placeholder="Required for orders">
+                            </div>
+                            <div class="row my-3">
+                                <div class="col-12">
+                                    <label for="streetAddressInput">Street Address <span class="text-danger">*</span></label>
+                                    <input class="form-control {{ isset($missingFields['address']) ? 'border-warning' : '' }}" type="text" id="streetAddressInput" name="street_address"
+                                        value="{{ ($user->reSeller?->getAddressParts() ?? [])['street_address'] ?? '' }}" placeholder="Street number and name">
+                                </div>
+                            </div>
+                            <div class="row my-3">
+                                <div class="col-md-4">
+                                    <label for="cityInput">City <span class="text-danger">*</span></label>
+                                    <input class="form-control {{ isset($missingFields['address']) ? 'border-warning' : '' }}" type="text" id="cityInput" name="city"
+                                        value="{{ ($user->reSeller?->getAddressParts() ?? [])['city'] ?? '' }}" placeholder="City">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="stateInput">State / Province <span class="text-danger">*</span></label>
+                                    <input class="form-control {{ isset($missingFields['address']) ? 'border-warning' : '' }}" type="text" id="stateInput" name="state"
+                                        value="{{ ($user->reSeller?->getAddressParts() ?? [])['state'] ?? '' }}" placeholder="State or Province">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="postalCodeInput">ZIP / Postal Code <span class="text-danger">*</span></label>
+                                    <input class="form-control {{ isset($missingFields['address']) ? 'border-warning' : '' }}" type="text" id="postalCodeInput" name="postal_code"
+                                        value="{{ ($user->reSeller?->getAddressParts() ?? [])['postal_code'] ?? '' }}" placeholder="ZIP or Postal Code">
                                 </div>
                             </div>
                             <div class="text-end">

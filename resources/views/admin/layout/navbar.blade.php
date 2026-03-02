@@ -5,7 +5,7 @@
             <!-- Topbar Brand Logo -->
             <div class="logo-topbar">
                 <!-- Logo Dark -->
-                <a href="index.html">
+                <a href="https://livinglegacyqr.com/" target="_blank">
                     <span class="d-block d-md-none">
                         <img class="logo" src="{{ asset('images/logo/cropped.png') }}" style="max-width: 80px;">
                     </span>

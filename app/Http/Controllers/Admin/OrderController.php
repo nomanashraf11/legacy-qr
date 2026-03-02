@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OrderAcceptedMail;
-use App\Mail\OrderDeliveredMail;
 use App\Mail\OrderShippedMail;
 use App\Models\Order;
 use App\Models\ReSeller;
@@ -30,9 +29,13 @@ class OrderController extends Controller
                     })
                     ->addColumn('action', function ($row) {
                         $viewOrder = route('orderDetails', $row->uuid);
-                        $btn = '<a href="' . $viewOrder . '" class="me-2" title="View / Dispatch"><i class="mdi mdi-eye fs-4"></i></a>';
+                        $btn = '<span class="d-inline-block me-2 order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="View order details"><a href="' . $viewOrder . '" class="text-body"><i class="mdi mdi-eye fs-4"></i></a></span>';
+                        if (!$row->accepted_at) {
+                            $btn .= '<span class="d-inline-block me-2 order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Accept order and send confirmation email"><i class="acceptOrderButton uil uil-check-circle text-success fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
+                        }
                         if ($row->status == Order::STATUS_PENDING || $row->status == Order::STATUS_IN_PROGRESS) {
-                            $btn .= '<i class="changeStatusButton uil uil-truck text-primary fs-4" style="cursor:pointer;" title="Mark Delivered" id="' . $row->uuid . '"></i>';
+                            $btn .= '<span class="d-inline-block me-2 order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add / Edit shipping & tracking"><i class="changeTrackingDetails uil uil-package text-info fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
+                            $btn .= '<span class="d-inline-block order-action-tip" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Mark as delivered"><i class="changeStatusButton uil uil-truck text-primary fs-4" style="cursor:pointer;" id="' . $row->uuid . '"></i></span>';
                         }
                         return $btn;
                     })
@@ -85,11 +88,13 @@ class OrderController extends Controller
             $order->update(['accepted_at' => now()]);
             DB::commit();
 
+            $order->load(['orderItems.product', 'reSeller.user']);
             $data = [
                 'userName' => $order->reSeller->user->name,
                 'orderNumber' => substr($order->uuid, 0, 8),
                 'invoiceUrl' => url()->route('order.invoice.view', $order->uuid),
                 'portalUrl' => url()->route('reseller.invoices'),
+                'order' => $order,
             ];
             Mail::to($order->reSeller->user->email)->send(new OrderAcceptedMail($data));
 
@@ -116,11 +121,13 @@ class OrderController extends Controller
             ]);
             DB::commit();
             $data = [
-                'tracking' => $order->tracking_id,
                 'userName' => $order->reSeller->user->name,
                 'orderNumber' => substr($order->uuid, 0, 8),
+                'tracking' => $order->tracking_id,
+                'trackingDetails' => $order->tracking_details,
+                'shippingCarrier' => $order->shipping_carrier,
             ];
-            Mail::to($order->reSeller->user->email)->send(new OrderDeliveredMail($data));
+            Mail::to($order->reSeller->user->email)->send(new OrderShippedMail($data));
             return response()->json([
                 'status' => true,
                 'message' => 'Marked as Delivered'

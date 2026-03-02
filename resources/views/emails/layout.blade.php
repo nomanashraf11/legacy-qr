@@ -9,7 +9,7 @@
         table { border-collapse: collapse; }
         .wrapper { max-width: 600px; margin: 0 auto; }
         .card { background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-        .header-bar { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 24px; text-align: center; }
+        .header-bar { background: #000000; padding: 24px; text-align: center; }
         .logo-cell { padding: 0; text-align: center; }
         .logo { max-width: 160px; height: auto; display: block; margin: 0 auto; }
         .title-cell { padding: 24px 24px 8px; text-align: center; background-color: #ffffff; }
@@ -31,8 +31,8 @@
 <tr><td style="padding:32px 16px;">
 <table width="600" cellpadding="0" cellspacing="0" align="center" style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden;">
 <tr>
-    <td style="background:linear-gradient(135deg, #1a365d 0%, #2c5282 100%);padding:28px 24px;text-align:center;">
-        <img src="https://res.cloudinary.com/djjd5w5dw/image/upload/v1757955293/logocentered_e0clto.png" alt="Living Legacy" width="160" style="max-width:160px;height:auto;display:block;margin:0 auto;border:0;">
+    <td style="background:#000000;padding:28px 24px;text-align:center;">
+        <img src="{{ config('app.mail_logo_url') }}" alt="Living Legacy" width="160" style="max-width:160px;height:auto;display:block;margin:0 auto;border:0;">
     </td>
 </tr>
 <tr>

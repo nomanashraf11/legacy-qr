@@ -41,26 +41,26 @@
                             : $product->priceTiers->map(fn($t) => ['min' => $t->min_quantity, 'max' => $t->max_quantity, 'price' => (float) $t->price])->toJson();
                     @endphp
                     <div class="col-12 col-sm-6 col-xl-4 product-card" data-search="{{ strtolower($product->name . ' ' . $product->sku) }}">
-                        <div class="card h-100 border-0 shadow-sm overflow-hidden">
-                            <div class="position-relative overflow-hidden" style="height: 200px; background: #f8f9fa;">
+                        <div class="card h-100 border-0 rounded-3 overflow-hidden shadow-sm product-card-modern">
+                            <div class="position-relative overflow-hidden d-flex align-items-center justify-content-center product-card-image bg-light" style="height: 200px;">
                                 @if($product->image_url)
-                                    <img src="{{ $product->image_url }}" class="w-100 h-100" alt="{{ $product->name }}" style="object-fit: cover;">
+                                    <img src="{{ $product->image_url }}" class="w-100 h-100" alt="{{ $product->name }}" style="object-fit: contain;">
                                 @else
-                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center">
-                                        <i class="uil uil-image display-1 text-muted"></i>
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                        <i class="uil uil-image display-1 text-muted opacity-50"></i>
                                     </div>
                                 @endif
-                                <span class="badge bg-dark position-absolute top-0 end-0 m-2">{{ $product->sku }}</span>
+                                <span class="badge rounded-pill bg-dark position-absolute top-0 end-0 m-2 px-2 py-1">{{ $product->sku }}</span>
                             </div>
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title mb-2">{{ $product->name }}</h5>
+                                <h5 class="card-title mb-2 fw-semibold text-dark">{{ $product->name }}</h5>
                                 @if($product->description)
-                                    <p class="text-muted small mb-2">{{ Str::limit($product->description, 80) }}</p>
+                                    <p class="text-muted small mb-2 opacity-90">{{ Str::limit($product->description, 80) }}</p>
                                 @endif
 
                                 @if($product->priceTiers->isNotEmpty())
                                     <div class="mb-2">
-                                        <p class="text-muted small text-uppercase mb-1 fw-semibold">Volume Pricing</p>
+                                        <p class="text-muted small text-uppercase mb-1 fw-semibold" style="letter-spacing: 0.5px;">Volume Pricing</p>
                                         <ul class="list-unstyled small mb-0">
                                             @foreach($product->priceTiers as $tier)
                                                 <li class="text-muted">{{ $tier->min_quantity }}-{{ $tier->max_quantity >= 999999 ? '∞' : $tier->max_quantity }}: ${{ number_format($tier->price, 2) }}/ea</li>
@@ -69,25 +69,25 @@
                                     </div>
                                 @endif
 
-                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
                                     <span class="text-success fw-bold fs-4 product-price" data-tiers="{{ e($tiersJson) }}" data-base="{{ $product->price }}">
                                         ${{ number_format($product->price, 2) }}
                                         @if($product->priceTiers->isNotEmpty())
-                                            <span class="badge bg-info ms-1">tiered</span>
+                                            <span class="badge bg-info bg-opacity-25 text-info ms-1">tiered</span>
                                         @endif
                                     </span>
-                                    <span class="text-muted small">{{ $product->stock }} in stock</span>
+                                    <span class="text-muted small"><i class="uil uil-box me-1"></i>{{ $product->stock }} in stock</span>
                                 </div>
 
                                 <form class="add-to-cart-form mt-auto" data-product-id="{{ $product->id }}" data-stock="{{ $product->stock }}">
                                     @csrf
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                        <div class="input-group input-group-sm rounded-2" style="width: 120px;">
                                             <button type="button" class="btn btn-outline-secondary qty-minus">−</button>
                                             <input type="number" name="quantity" value="1" min="1" max="{{ $product->stock }}" class="form-control form-control-sm text-center qty-input" style="max-width: 50px;">
                                             <button type="button" class="btn btn-outline-secondary qty-plus">+</button>
                                         </div>
-                                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                                        <button type="submit" class="btn btn-primary btn-sm flex-grow-1 rounded-2">
                                             <i class="uil uil-plus me-1"></i>Add to cart
                                         </button>
                                     </div>
@@ -97,10 +97,10 @@
                     </div>
                 @empty
                     <div class="col-12">
-                        <div class="card border-0 shadow-sm">
+                        <div class="card border-0 rounded-3 shadow-sm">
                             <div class="card-body text-center py-5">
-                                <i class="uil uil-shopping-bag display-4 text-muted mb-3"></i>
-                                <h5>No products available</h5>
+                                <i class="uil uil-shopping-bag display-4 text-muted mb-3 opacity-50"></i>
+                                <h5 class="fw-semibold">No products available</h5>
                                 <p class="text-muted mb-0">Check back later for new items.</p>
                             </div>
                         </div>

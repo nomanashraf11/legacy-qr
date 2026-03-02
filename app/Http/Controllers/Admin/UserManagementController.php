@@ -35,16 +35,16 @@ class UserManagementController extends Controller
                     })
                     ->addColumn('action', function ($row) {
                         if ($row->isBanned == 0) {
-                            $btn = '<i class="blockUserButton uil-user-times text-danger fs-3" style="cursor:pointer;" name = "deleteManagerButton" id="'.$row->id.'"></i>';
+                            $btn = '<i class="blockUserButton uil-user-times text-danger fs-3" style="cursor:pointer;" name = "deleteManagerButton" id="'.$row->id.'" title="Ban user"></i>';
                         } else {
-                            $btn = '<i class="uil-user-check blockUserButton text-primary fs-3" style="cursor:pointer;" name = "deleteManagerButton" id="'.$row->id.'"></i>';
+                            $btn = '<i class="uil-user-check blockUserButton text-primary fs-3" style="cursor:pointer;" name = "deleteManagerButton" id="'.$row->id.'" title="Unban user"></i>';
                         }
                         if ($row->reSeller) {
                             if ($row->reSeller->orders->count() > 0) {
-
                                 $view = route('order.resellars', $row->reSeller->uuid);
-                                $btn .= ' <a class="ms-1" href="'.$view.'"><i class="mdi mdi-eye fs-3"></i></a>';
+                                $btn .= ' <a class="ms-1" href="'.$view.'" title="View orders"><i class="mdi mdi-eye fs-3"></i></a>';
                             }
+                            $btn .= ' <i class="deleteUserButton uil-trash-alt text-danger fs-3 ms-1" style="cursor:pointer;" id="'.$row->id.'" title="Delete reseller"></i>';
                             return $btn;
                         }
                         return $btn;
@@ -144,6 +144,15 @@ class UserManagementController extends Controller
 
             $user = User::findorfail($id);
             $localUser = $user->localUser;
+            $reSeller = $user->reSeller;
+
+            if ($reSeller) {
+                $user->removeRole('re-sellers');
+                $reSeller->delete();
+                $user->delete();
+                DB::commit();
+                return response()->json(['status' => true, 'message' => 'Reseller deleted successfully']);
+            }
 
             if ($localUser) {
 
@@ -423,6 +432,25 @@ class UserManagementController extends Controller
             ]);
         } catch (\Throwable $th) {
             \Log::error('Reject reseller application error: ' . $th->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong.',
+            ]);
+        }
+    }
+
+    public function deleteResellerApplication($id)
+    {
+        try {
+            $app = ResellerApplication::findOrFail($id);
+            $app->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Application deleted successfully.',
+            ]);
+        } catch (\Throwable $th) {
+            \Log::error('Delete reseller application error: ' . $th->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong.',

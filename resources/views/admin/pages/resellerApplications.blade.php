@@ -49,7 +49,7 @@
                                     <p class="text-muted mb-2 small"><i class="mdi mdi-map-marker-outline me-1"></i>{{ $location }}</p>
                                 @endif
                                 <p class="text-muted mb-3 small">{{ $app->created_at ? $app->created_at->format('M j, Y') : '—' }}</p>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-sm btn-outline-primary viewApplicationBtn" data-id="{{ $app->id }}">
                                         <i class="mdi mdi-eye me-1"></i>View
                                     </button>
@@ -61,6 +61,9 @@
                                             <i class="mdi mdi-close-circle me-1"></i>Reject
                                         </button>
                                     @endif
+                                    <button type="button" class="btn btn-sm btn-outline-danger deleteResellerApplication" data-url="{{ route('admin.reseller.application.delete', $app->id) }}" title="Delete application">
+                                        <i class="mdi mdi-delete-outline me-1"></i>Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -87,6 +90,9 @@
                     </div>
                 </div>
                 <div class="modal-footer" id="viewApplicationFooter" style="display: none;">
+                    <button type="button" class="btn btn-outline-danger deleteFromModal me-auto" style="display: none;" title="Delete application">
+                        <i class="mdi mdi-delete-outline me-1"></i>Delete
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-success approveFromModal" style="display: none;">
                         <i class="mdi mdi-check-circle me-1"></i>Approve
@@ -103,6 +109,7 @@
     <script>
         $(function() {
             var detailUrl = "{{ url('reseller-applications') }}";
+            var currentApplicationId = null;
 
             function filterApplications() {
                 var search = $('#searchApplications').val().toLowerCase();
@@ -120,6 +127,7 @@
 
             $(document).on("click", ".viewApplicationBtn", function() {
                 var id = $(this).data('id');
+                currentApplicationId = id;
                 var $modal = $('#viewApplicationModal');
                 var $content = $('#viewApplicationContent');
                 var $footer = $('#viewApplicationFooter');
@@ -150,8 +158,21 @@
                             '</div>';
                         $content.html(html);
 
+                        $footer.show();
+                        $('.deleteFromModal').show().off('click').on('click', function() {
+                            if (!confirm('Permanently delete this application? This cannot be undone.')) return;
+                            var url = detailUrl + '/' + currentApplicationId + '/delete';
+                            $.post(url, { _token: "{{ csrf_token() }}" })
+                                .done(function(r) {
+                                    toastr.success(r.message, "Success");
+                                    $modal.modal('hide');
+                                    location.reload();
+                                })
+                                .fail(function(xhr) {
+                                    toastr.error(xhr.responseJSON?.message || 'Something went wrong', "Error");
+                                });
+                        });
                         if (app.status === 'pending') {
-                            $footer.show();
                             $('.approveFromModal, .rejectFromModal').show().off('click').on('click', function() {
                                 var isApprove = $(this).hasClass('approveFromModal');
                                 var baseUrl = "{{ url('reseller-applications') }}";
@@ -166,6 +187,8 @@
                                         toastr.error(xhr.responseJSON?.message || 'Something went wrong', "Error");
                                     });
                             });
+                        } else {
+                            $('.approveFromModal, .rejectFromModal').hide();
                         }
                     })
                     .fail(function() {
@@ -200,6 +223,21 @@
                         toastr.error(xhr.responseJSON?.message || 'Something went wrong', "Error");
                     });
             });
+
+            $(document).on("click", ".deleteResellerApplication", function(e) {
+                e.preventDefault();
+                var url = $(this).data('url');
+                if (!confirm('Permanently delete this application? This cannot be undone.')) return;
+                $.post(url, { _token: "{{ csrf_token() }}" })
+                    .done(function(r) {
+                        toastr.success(r.message, "Success");
+                        location.reload();
+                    })
+                    .fail(function(xhr) {
+                        toastr.error(xhr.responseJSON?.message || 'Something went wrong', "Error");
+                    });
+            });
+
         });
     </script>
 @endpush

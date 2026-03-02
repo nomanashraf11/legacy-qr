@@ -28,7 +28,7 @@ class OrderDeliveredMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Delivered Mail',
+            subject: 'Order Delivery Confirmation',
         );
     }
 

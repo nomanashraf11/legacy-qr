@@ -29,7 +29,7 @@ class ResellerInvitationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Reseller Portal Access',
+            subject: 'Approved: Welcome to the Living Legacy Partner Portal',
         );
     }
 
