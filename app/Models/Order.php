@@ -19,6 +19,13 @@ class Order extends Model
         'uuid',
         'tracking_id',
         'tracking_details',
+        'stripe_checkout_session_id',
+        'stripe_payment_intent_id',
+        'stripe_customer_id',
+        'stripe_payment_status',
+        'stripe_shipping_name',
+        'stripe_shipping_phone',
+        'stripe_shipping_address',
         'shipping_carrier',
         'qr_codes',
         'amount',
@@ -31,6 +38,7 @@ class Order extends Model
     protected $casts = [
         'accepted_at' => 'datetime',
         'shipping_email_sent' => 'boolean',
+        'stripe_shipping_address' => 'array',
     ];
     public function reSeller()
     {

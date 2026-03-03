@@ -19,6 +19,21 @@ use Illuminate\View\View;
 
 class ProductCatalogController extends Controller
 {
+    protected function buildCheckoutCartHash(array $cart): string
+    {
+        $normalized = collect($cart)
+            ->map(fn($item) => [
+                'product_id' => (int) ($item['product_id'] ?? 0),
+                'quantity' => (int) ($item['quantity'] ?? 0),
+                'price' => (float) ($item['price'] ?? 0),
+            ])
+            ->sortBy('product_id')
+            ->values()
+            ->all();
+
+        return hash('sha256', json_encode($normalized));
+    }
+
     protected function ensureResellerCanPurchase(): ?RedirectResponse
     {
         $admin = User::role('admin')->first()?->admin;
@@ -203,6 +218,7 @@ class ProductCatalogController extends Controller
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Payment is not configured. Please contact support.');
         }
         $stripe = new \Stripe\StripeClient($stripeSecret);
+        $cartHash = $this->buildCheckoutCartHash($cart);
         $session = $stripe->checkout->sessions->create([
             'success_url' => route('reseller.checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('reseller.cart'),
@@ -211,14 +227,57 @@ class ProductCatalogController extends Controller
             'line_items' => $lineItems,
             'mode' => 'payment',
             'allow_promotion_codes' => true,
+            'shipping_address_collection' => [
+                'allowed_countries' => ['US'],
+            ],
+            'shipping_options' => [[
+                'shipping_rate_data' => [
+                    'type' => 'fixed_amount',
+                    'fixed_amount' => [
+                        'amount' => 0,
+                        'currency' => 'usd',
+                    ],
+                    'display_name' => 'Standard Shipping',
+                    'delivery_estimate' => [
+                        'minimum' => ['unit' => 'business_day', 'value' => 3],
+                        'maximum' => ['unit' => 'business_day', 'value' => 7],
+                    ],
+                ],
+            ]],
+            'metadata' => [
+                'app_source' => 'reseller_cart_checkout',
+                'reseller_user_id' => (string) Auth::id(),
+                'cart_hash' => $cartHash,
+            ],
         ]);
 
-        session(['reseller_checkout_cart' => $cart]);
+        session([
+            'reseller_checkout_cart' => $cart,
+            'reseller_checkout_context' => [
+                'session_id' => $session->id,
+                'cart_hash' => $cartHash,
+                'user_id' => Auth::id(),
+            ],
+        ]);
         return redirect($session->url);
     }
 
     public function checkoutSuccess(Request $request): RedirectResponse
     {
+        $sessionId = (string) $request->query('session_id', '');
+        if ($sessionId === '') {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Invalid checkout session.');
+        }
+
+        $checkoutContext = session('reseller_checkout_context', []);
+        if (
+            empty($checkoutContext['session_id']) ||
+            !hash_equals((string) $checkoutContext['session_id'], $sessionId) ||
+            (int) ($checkoutContext['user_id'] ?? 0) !== (int) Auth::id()
+        ) {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Checkout session validation failed.');
+        }
+
         $cart = session('reseller_checkout_cart', []);
         if (empty($cart)) {
             return redirect()->route('reseller.products')->with('status', false)->with('message', 'Session expired.');
@@ -228,11 +287,42 @@ class ProductCatalogController extends Controller
         if (empty($stripeSecret)) {
             return redirect()->route('reseller.products')->with('status', false)->with('message', 'Payment is not configured.');
         }
+
+        $existingOrder = Order::where('stripe_checkout_session_id', $sessionId)->first();
+        if ($existingOrder) {
+            session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
+            return redirect()->route('myOrders')->with('status', true)->with('message', 'Order already processed for this payment.');
+        }
+
         $stripe = new \Stripe\StripeClient($stripeSecret);
-        $session = $stripe->checkout->sessions->retrieve($request->session_id);
+        try {
+            $session = $stripe->checkout->sessions->retrieve($sessionId);
+        } catch (\Throwable $e) {
+            \Log::warning('Stripe session retrieval failed: ' . $e->getMessage());
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Unable to verify payment session.');
+        }
 
         if ($session->payment_status !== 'paid') {
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Payment was not completed.');
+        }
+
+        $sessionEmail = strtolower(trim((string) ($session->customer_details->email ?? $session->customer_email ?? '')));
+        $expectedEmail = strtolower(trim((string) Auth::user()->email));
+        if ($sessionEmail !== '' && $sessionEmail !== $expectedEmail) {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Checkout session does not match your account.');
+        }
+
+        $metadataUserId = (string) ($session->metadata->reseller_user_id ?? '');
+        if ($metadataUserId !== (string) Auth::id()) {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Checkout session ownership mismatch.');
+        }
+
+        $cartHash = $this->buildCheckoutCartHash($cart);
+        if (
+            (string) ($session->metadata->cart_hash ?? '') !== $cartHash ||
+            (string) ($checkoutContext['cart_hash'] ?? '') !== $cartHash
+        ) {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Cart changed during checkout. Please try again.');
         }
 
         // Re-validate stock before creating order (may have changed since checkout)
@@ -248,6 +338,17 @@ class ProductCatalogController extends Controller
 
         DB::beginTransaction();
         try {
+            $shippingDetails = $session->shipping_details ?? null;
+            $shippingAddress = $shippingDetails->address ?? null;
+            $shippingAddressPayload = $shippingAddress ? [
+                'line1' => $shippingAddress->line1 ?? null,
+                'line2' => $shippingAddress->line2 ?? null,
+                'city' => $shippingAddress->city ?? null,
+                'state' => $shippingAddress->state ?? null,
+                'postal_code' => $shippingAddress->postal_code ?? null,
+                'country' => $shippingAddress->country ?? null,
+            ] : null;
+
             $order = Order::create([
                 'uuid' => Str::uuid(),
                 'qr_codes' => $totalQty,
@@ -255,6 +356,13 @@ class ProductCatalogController extends Controller
                 'status' => 0,
                 're_seller_id' => Auth::user()->reSeller->id,
                 'tracking_details' => 'Order is pending',
+                'stripe_checkout_session_id' => $sessionId,
+                'stripe_payment_intent_id' => is_string($session->payment_intent ?? null) ? $session->payment_intent : ($session->payment_intent->id ?? null),
+                'stripe_customer_id' => is_string($session->customer ?? null) ? $session->customer : ($session->customer->id ?? null),
+                'stripe_payment_status' => $session->payment_status ?? null,
+                'stripe_shipping_name' => $shippingDetails->name ?? null,
+                'stripe_shipping_phone' => $shippingDetails->phone ?? null,
+                'stripe_shipping_address' => $shippingAddressPayload,
             ]);
 
             foreach ($cart as $item) {
@@ -300,7 +408,7 @@ class ProductCatalogController extends Controller
             }
         }
 
-        session()->forget(['reseller_cart', 'reseller_checkout_cart']);
+        session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
         return redirect()->route('myOrders')->with('status', true)->with('message', 'Order placed successfully!');
     }
 }
