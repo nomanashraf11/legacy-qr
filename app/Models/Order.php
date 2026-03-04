@@ -26,6 +26,12 @@ class Order extends Model
         'stripe_shipping_name',
         'stripe_shipping_phone',
         'stripe_shipping_address',
+        'payment_method',
+        'stripe_invoice_id',
+        'stripe_invoice_number',
+        'stripe_invoice_status',
+        'payment_terms_days',
+        'invoice_due_at',
         'shipping_carrier',
         'qr_codes',
         'amount',
@@ -39,6 +45,7 @@ class Order extends Model
         'accepted_at' => 'datetime',
         'shipping_email_sent' => 'boolean',
         'stripe_shipping_address' => 'array',
+        'invoice_due_at' => 'datetime',
     ];
     public function reSeller()
     {

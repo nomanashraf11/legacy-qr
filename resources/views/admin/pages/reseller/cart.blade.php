@@ -93,12 +93,23 @@
                                     </a>
                                     <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
                                         <div class="fs-5">Total: <span class="fw-bold text-primary" id="cartTotal">${{ number_format($total, 2) }}</span></div>
-                                        <form action="{{ route('reseller.checkout') }}" method="post" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-primary btn-lg">
-                                                <i class="uil uil-credit-card me-2"></i>Proceed to Checkout
-                                            </button>
-                                        </form>
+                                        <div class="d-flex flex-column flex-sm-row align-items-center gap-2">
+                                            <form action="{{ route('reseller.checkout') }}" method="post" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-primary btn-lg">
+                                                    <i class="uil uil-credit-card me-2"></i>Proceed to Checkout
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('reseller.checkout.net30') }}" method="post" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-outline-primary btn-lg">
+                                                    <i class="uil uil-file-alt me-2"></i>Pay by Invoice (Net 30)
+                                                </button>
+                                            </form>
+                                            <small class="text-muted text-center text-sm-start">
+                                                Need Net 30 terms? Request an invoice instead.
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

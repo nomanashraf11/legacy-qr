@@ -39,6 +39,14 @@ return [
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
+        'shipping_allowed_countries' => array_values(array_filter(array_map('trim', explode(',', (string) env('STRIPE_SHIPPING_ALLOWED_COUNTRIES', 'US,CA'))))),
+        'shipping_rate_standard_id' => env('STRIPE_SHIPPING_RATE_STANDARD_ID'),
+        'shipping_rate_express_id' => env('STRIPE_SHIPPING_RATE_EXPRESS_ID'),
+        'shipping_standard_amount' => (int) env('STRIPE_SHIPPING_STANDARD_AMOUNT', 500),
+        'shipping_express_amount' => (int) env('STRIPE_SHIPPING_EXPRESS_AMOUNT', 1500),
+        'shipping_currency' => env('STRIPE_SHIPPING_CURRENCY', 'usd'),
+        'net30_due_days' => (int) env('STRIPE_NET30_DUE_DAYS', 30),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
 ];

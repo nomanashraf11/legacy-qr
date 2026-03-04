@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,6 +60,111 @@ class ProductCatalogController extends Controller
                 ->with('missing_profile_fields', $missing);
         }
         return null;
+    }
+
+    protected function getCheckoutAllowedCountries(): array
+    {
+        $countries = config('services.stripe.shipping_allowed_countries', ['US', 'CA']);
+        if (!is_array($countries) || empty($countries)) {
+            return ['US', 'CA'];
+        }
+        return array_values(array_filter(array_map(
+            fn($country) => strtoupper(trim((string) $country)),
+            $countries
+        )));
+    }
+
+    protected function buildCheckoutShippingOptions(): array
+    {
+        $standardId = (string) config('services.stripe.shipping_rate_standard_id', '');
+        $expressId = (string) config('services.stripe.shipping_rate_express_id', '');
+
+        $idBasedOptions = [];
+        if ($standardId !== '') {
+            $idBasedOptions[] = ['shipping_rate' => $standardId];
+        }
+        if ($expressId !== '') {
+            $idBasedOptions[] = ['shipping_rate' => $expressId];
+        }
+        if (!empty($idBasedOptions)) {
+            return $idBasedOptions;
+        }
+
+        $currency = strtolower((string) config('services.stripe.shipping_currency', 'usd'));
+        $standardAmount = max(0, (int) config('services.stripe.shipping_standard_amount', 500));
+        $expressAmount = max(0, (int) config('services.stripe.shipping_express_amount', 1500));
+
+        return [
+            [
+                'shipping_rate_data' => [
+                    'type' => 'fixed_amount',
+                    'fixed_amount' => [
+                        'amount' => $standardAmount,
+                        'currency' => $currency,
+                    ],
+                    'display_name' => 'Standard Shipping',
+                    'delivery_estimate' => [
+                        'minimum' => ['unit' => 'business_day', 'value' => 3],
+                        'maximum' => ['unit' => 'business_day', 'value' => 5],
+                    ],
+                ],
+            ],
+            [
+                'shipping_rate_data' => [
+                    'type' => 'fixed_amount',
+                    'fixed_amount' => [
+                        'amount' => $expressAmount,
+                        'currency' => $currency,
+                    ],
+                    'display_name' => 'Express Shipping',
+                    'delivery_estimate' => [
+                        'minimum' => ['unit' => 'business_day', 'value' => 1],
+                        'maximum' => ['unit' => 'business_day', 'value' => 2],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    protected function createOrGetStripeCustomer(\Stripe\StripeClient $stripe, User $user, string $cartHash): object
+    {
+        $existing = $stripe->customers->all([
+            'email' => $user->email,
+            'limit' => 1,
+        ]);
+        if (!empty($existing->data)) {
+            return $existing->data[0];
+        }
+
+        $reseller = $user->reSeller;
+        $addressParts = $reseller?->getAddressParts() ?? [];
+        $street = trim((string) ($addressParts['street_address'] ?? ''));
+        $city = trim((string) ($addressParts['city'] ?? ''));
+        $state = trim((string) ($addressParts['state'] ?? ''));
+        $postalCode = trim((string) ($addressParts['postal_code'] ?? ''));
+
+        $customerPayload = [
+            'email' => $user->email,
+            'name' => $user->name,
+            'phone' => $reseller?->phone ?: null,
+            'metadata' => [
+                'app_source' => 'reseller_net30_checkout',
+                'reseller_user_id' => (string) $user->id,
+                'cart_hash' => $cartHash,
+            ],
+        ];
+
+        if ($street !== '' && $city !== '' && $state !== '') {
+            $customerPayload['address'] = array_filter([
+                'line1' => $street,
+                'city' => $city,
+                'state' => $state,
+                'postal_code' => $postalCode ?: null,
+                'country' => 'US',
+            ], fn($v) => $v !== null && $v !== '');
+        }
+
+        return $stripe->customers->create($customerPayload);
     }
 
     public function index(): View|RedirectResponse
@@ -228,22 +334,9 @@ class ProductCatalogController extends Controller
             'mode' => 'payment',
             'allow_promotion_codes' => true,
             'shipping_address_collection' => [
-                'allowed_countries' => ['US'],
+                'allowed_countries' => $this->getCheckoutAllowedCountries(),
             ],
-            'shipping_options' => [[
-                'shipping_rate_data' => [
-                    'type' => 'fixed_amount',
-                    'fixed_amount' => [
-                        'amount' => 0,
-                        'currency' => 'usd',
-                    ],
-                    'display_name' => 'Standard Shipping',
-                    'delivery_estimate' => [
-                        'minimum' => ['unit' => 'business_day', 'value' => 3],
-                        'maximum' => ['unit' => 'business_day', 'value' => 7],
-                    ],
-                ],
-            ]],
+            'shipping_options' => $this->buildCheckoutShippingOptions(),
             'metadata' => [
                 'app_source' => 'reseller_cart_checkout',
                 'reseller_user_id' => (string) Auth::id(),
@@ -363,6 +456,7 @@ class ProductCatalogController extends Controller
                 'stripe_shipping_name' => $shippingDetails->name ?? null,
                 'stripe_shipping_phone' => $shippingDetails->phone ?? null,
                 'stripe_shipping_address' => $shippingAddressPayload,
+                'payment_method' => 'card_checkout',
             ]);
 
             foreach ($cart as $item) {
@@ -410,5 +504,137 @@ class ProductCatalogController extends Controller
 
         session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
         return redirect()->route('myOrders')->with('status', true)->with('message', 'Order placed successfully!');
+    }
+
+    public function checkoutNet30(Request $request): RedirectResponse
+    {
+        if ($redirect = $this->ensureResellerCanPurchase()) {
+            return $redirect;
+        }
+
+        $cart = session('reseller_cart', []);
+        if (empty($cart)) {
+            return redirect()->route('reseller.products')->with('status', false)->with('message', 'Your cart is empty.');
+        }
+
+        $stripeSecret = config('services.stripe.secret');
+        if (empty($stripeSecret)) {
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Payment is not configured. Please contact support.');
+        }
+
+        $cartHash = $this->buildCheckoutCartHash($cart);
+        $lastNet30Context = session('reseller_net30_context', []);
+        if (
+            !empty($lastNet30Context['cart_hash']) &&
+            (string) $lastNet30Context['cart_hash'] === $cartHash &&
+            !empty($lastNet30Context['created_at']) &&
+            Carbon::parse((string) $lastNet30Context['created_at'])->greaterThan(now()->subMinutes(2))
+        ) {
+            return redirect()->route('myOrders')->with('status', true)->with('message', 'A Net 30 invoice for this cart was just created. Please check your email.');
+        }
+
+        $lineItems = [];
+        foreach ($cart as $item) {
+            $product = Product::find($item['product_id']);
+            if (!$product || $product->stock < $item['quantity']) {
+                return redirect()->route('reseller.cart')->with('status', false)->with('message', "Insufficient stock for {$item['name']}");
+            }
+            $lineItems[] = [
+                'product_id' => $item['product_id'],
+                'name' => $item['name'],
+                'quantity' => (int) $item['quantity'],
+                'unit_amount' => (int) round($item['price'] * 100),
+                'unit_price' => (float) $item['price'],
+            ];
+        }
+
+        $user = Auth::user();
+        $reSeller = $user->reSeller;
+        $stripe = new \Stripe\StripeClient($stripeSecret);
+        $dueDays = max(1, (int) config('services.stripe.net30_due_days', 30));
+
+        DB::beginTransaction();
+        try {
+            $customer = $this->createOrGetStripeCustomer($stripe, $user, $cartHash);
+
+            foreach ($lineItems as $item) {
+                $stripe->invoiceItems->create([
+                    'customer' => $customer->id,
+                    'currency' => 'usd',
+                    'unit_amount' => $item['unit_amount'],
+                    'quantity' => $item['quantity'],
+                    'description' => $item['name'],
+                    'metadata' => [
+                        'product_id' => (string) $item['product_id'],
+                        'reseller_user_id' => (string) $user->id,
+                    ],
+                ]);
+            }
+
+            $invoice = $stripe->invoices->create([
+                'customer' => $customer->id,
+                'collection_method' => 'send_invoice',
+                'days_until_due' => $dueDays,
+                'auto_advance' => true,
+                'metadata' => [
+                    'app_source' => 'reseller_net30_checkout',
+                    'reseller_user_id' => (string) $user->id,
+                    'cart_hash' => $cartHash,
+                ],
+            ]);
+
+            $finalized = $stripe->invoices->finalizeInvoice($invoice->id, []);
+            $stripe->invoices->sendInvoice($invoice->id, []);
+
+            $totalQty = collect($cart)->sum('quantity');
+            $totalAmount = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
+
+            $order = Order::create([
+                'uuid' => Str::uuid(),
+                'qr_codes' => $totalQty,
+                'amount' => $totalAmount,
+                'status' => Order::STATUS_PENDING,
+                're_seller_id' => $reSeller->id,
+                'tracking_details' => 'Net 30 invoice sent. Awaiting payment.',
+                'payment_method' => 'net30_invoice',
+                'stripe_customer_id' => $customer->id,
+                'stripe_payment_status' => 'unpaid',
+                'stripe_invoice_id' => $finalized->id,
+                'stripe_invoice_number' => $finalized->number ?? null,
+                'stripe_invoice_status' => $finalized->status ?? null,
+                'payment_terms_days' => $dueDays,
+                'invoice_due_at' => !empty($finalized->due_date) ? Carbon::createFromTimestamp((int) $finalized->due_date) : null,
+            ]);
+
+            foreach ($cart as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+                Product::where('id', $item['product_id'])->decrement('stock', $item['quantity']);
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Net 30 checkout error: ' . $e->getMessage(), [
+                'reseller_user_id' => Auth::id(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Could not create Net 30 invoice. Please try again.');
+        }
+
+        session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
+        session([
+            'reseller_net30_context' => [
+                'invoice_id' => $order->stripe_invoice_id,
+                'cart_hash' => $cartHash,
+                'created_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        return redirect()->route('myOrders')->with('status', true)->with('message', 'Net 30 invoice created and sent to your email.');
     }
 }

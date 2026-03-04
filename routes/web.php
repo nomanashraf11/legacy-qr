@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\ResellerApplicationController;
 use App\Http\Controllers\ResellerAuthController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\testvideo;
 
 
@@ -63,6 +64,7 @@ Route::get('terms-and-conditions', [LandingPageController::class, 'terms'])->nam
 Route::get('contact', [LandingPageController::class, 'contact'])->name('contact');
 Route::get('how-it-works', [LandingPageController::class, 'howItWorks'])->name('howWorks');
 Route::post('send-contact', [LandingPageController::class, 'sendContactMail'])->name('sendContact');
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 Route::view('re-seller-page', 'landing.pages.reSeller')->name('reseller.view');
 Route::post('create-re-seller-request', [UserManagementController::class, 're_seller_request'])->name('reSellerRequest');
 Route::post('reseller-application', [ResellerApplicationController::class, 'store'])->name('reseller.application.store');
@@ -177,6 +179,7 @@ Route::prefix('re_sellers')->middleware('auth', 'verified', 'role:re-sellers', '
         Route::post('cart/update', 'updateCart')->name('reseller.cart.update');
         Route::post('cart/remove', 'removeFromCart')->name('reseller.cart.remove');
         Route::post('checkout', 'checkout')->name('reseller.checkout');
+        Route::post('checkout/net30', 'checkoutNet30')->name('reseller.checkout.net30');
         Route::get('checkout/success', 'checkoutSuccess')->name('reseller.checkout.success');
     });
 });
