@@ -48,7 +48,7 @@
                                 @if($location)
                                     <p class="text-muted mb-2 small"><i class="mdi mdi-map-marker-outline me-1"></i>{{ $location }}</p>
                                 @endif
-                                <p class="text-muted mb-3 small">{{ $app->created_at ? $app->created_at->format('M j, Y') : '—' }}</p>
+                                <p class="text-muted mb-3 small">{{ $app->created_at ? $app->created_at->timezone('America/Chicago')->format('M j, Y g:i A T') : '—' }}</p>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-sm btn-outline-primary viewApplicationBtn" data-id="{{ $app->id }}">
                                         <i class="mdi mdi-eye me-1"></i>View
@@ -110,6 +110,24 @@
         $(function() {
             var detailUrl = "{{ url('reseller-applications') }}";
             var currentApplicationId = null;
+            var centralDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/Chicago',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                timeZoneName: 'short'
+            });
+
+            function formatCentralTimestamp(timestamp) {
+                if (!timestamp) return '—';
+                var parsed = new Date(timestamp);
+                if (isNaN(parsed.getTime())) return '—';
+                return centralDateTimeFormatter.format(parsed);
+            }
 
             function filterApplications() {
                 var search = $('#searchApplications').val().toLowerCase();
@@ -154,7 +172,7 @@
                             '<div class="col-md-6 mb-3"><label class="text-muted small">Estimated Monthly Volume</label><p class="mb-0">' + (app.estimated_monthly_volume || '—') + '</p></div>' +
                             '<div class="col-md-6 mb-3"><label class="text-muted small">How did you hear about us?</label><p class="mb-0">' + (app.hear_about_us || '—') + '</p></div>' +
                             '<div class="col-12 mb-3"><label class="text-muted small">Additional Notes</label><p class="mb-0">' + (app.additional_notes || '—') + '</p></div>' +
-                            '<div class="col-12"><label class="text-muted small">Applied</label><p class="mb-0">' + (app.created_at ? new Date(app.created_at).toLocaleString() : '—') + '</p></div>' +
+                            '<div class="col-12"><label class="text-muted small">Applied</label><p class="mb-0">' + formatCentralTimestamp(app.created_at) + '</p></div>' +
                             '</div>';
                         $content.html(html);
 

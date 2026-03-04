@@ -13,6 +13,10 @@ class ReSeller extends Model
         'website',
         'phone',
         'shipping_address',
+        'street_address',
+        'city',
+        'state',
+        'postal_code',
         'user_id',
     ];
     public function user()
@@ -30,6 +34,20 @@ class ReSeller extends Model
      */
     public function getAddressParts(): array
     {
+        if (
+            !empty($this->street_address) ||
+            !empty($this->city) ||
+            !empty($this->state) ||
+            !empty($this->postal_code)
+        ) {
+            return [
+                'street_address' => (string) ($this->street_address ?? ''),
+                'city' => (string) ($this->city ?? ''),
+                'state' => (string) ($this->state ?? ''),
+                'postal_code' => (string) ($this->postal_code ?? ''),
+            ];
+        }
+
         $addr = trim($this->shipping_address ?? '');
         if (empty($addr)) {
             return ['street_address' => '', 'city' => '', 'state' => '', 'postal_code' => ''];

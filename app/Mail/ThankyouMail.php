@@ -28,7 +28,7 @@ class ThankyouMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reseller Request',
+            subject: 'Partner Application Received',
         );
     }
 

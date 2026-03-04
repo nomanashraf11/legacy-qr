@@ -123,10 +123,10 @@
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-title="Settings">
+                        data-bs-title="My Account">
                         <a href="{{ route('admin.settings') }}" class="side-nav-link">
                             <i class="uil-cog"></i>
-                            <span>Settings</span>
+                            <span>My Account</span>
                         </a>
                     </li>
 
@@ -163,10 +163,10 @@
                         </a>
                     </li>
                     <li class="side-nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
-                        data-bs-title="Settings">
+                        data-bs-title="My Account">
                         <a href="{{ route('settings') }}" class="side-nav-link">
                             <i class="uil-cog"></i>
-                            <span>Settings</span>
+                            <span>My Account</span>
                         </a>
                     </li>
                 </ul>

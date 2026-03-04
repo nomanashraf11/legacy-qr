@@ -73,7 +73,7 @@
     <!-- Questions -->
     <tr>
         <td style="padding:0 40px 24px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="font-size:14px;line-height:1.5;color:#6b7280;margin:24px 0 0;">Questions? Reply to this email or <a href="{{ config('app.main_site_url', 'https://livinglegacyqr.com') }}/contact" style="color:#2563eb;text-decoration:underline;">book an onboarding call</a></p>
+            <p style="font-size:14px;line-height:1.5;color:#6b7280;margin:24px 0 0;">Questions? Reply to this email or <a href="https://calendly.com/livinglegacyqr-info/30min" style="color:#2563eb;text-decoration:underline;">book an onboarding call</a></p>
         </td>
     </tr>
     <!-- Footer -->

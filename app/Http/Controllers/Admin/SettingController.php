@@ -152,12 +152,20 @@ class SettingController extends Controller
                     'id' => $reSeller->id,
                     'phone' => $request->phone,
                     'shipping_address' => $shippingAddress,
+                    'street_address' => $request->street_address,
+                    'city' => $request->city,
+                    'state' => $request->state,
+                    'postal_code' => $request->postal_code,
                 ]);
             } else {
                 ReSeller::create([
                     'uuid' => Str::uuid(),
                     'phone' => $request->phone,
                     'shipping_address' => $shippingAddress,
+                    'street_address' => $request->street_address,
+                    'city' => $request->city,
+                    'state' => $request->state,
+                    'postal_code' => $request->postal_code,
                     'website' => '',
                     'user_id' => $user->id,
                 ]);

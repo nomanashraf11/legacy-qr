@@ -359,8 +359,7 @@ class UserManagementController extends Controller
             $shippingAddress = trim(implode(', ', array_filter([
                 $app->street_address,
                 $app->city,
-                $app->state,
-                $app->zip_code,
+                trim(implode(' ', array_filter([$app->state, $app->zip_code]))),
             ])));
 
             ReSeller::create([
@@ -368,6 +367,10 @@ class UserManagementController extends Controller
                 'phone' => $app->phone ?? $app->business_phone ?? '',
                 'website' => $app->website ?? '',
                 'shipping_address' => $shippingAddress ?: 'N/A',
+                'street_address' => $app->street_address ?: null,
+                'city' => $app->city ?: null,
+                'state' => $app->state ?: null,
+                'postal_code' => $app->zip_code ?: null,
                 'user_id' => $user->id,
             ]);
 

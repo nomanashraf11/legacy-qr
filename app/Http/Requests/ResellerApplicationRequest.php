@@ -25,7 +25,7 @@ class ResellerApplicationRequest extends FormRequest
             'business_name' => 'required|string|min:2|max:255',
             'business_category' => 'required|string|min:2|max:255',
             'years_in_business' => 'nullable|integer|min:0|max:100',
-            'street_address' => 'nullable|string|max:255',
+            'street_address' => 'required|string|min:5|max:255',
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:100',
             'zip_code' => 'nullable|string|max:20',
@@ -37,6 +37,14 @@ class ResellerApplicationRequest extends FormRequest
             'estimated_monthly_volume' => 'nullable|string|max:100',
             'hear_about_us' => 'nullable|string|max:255',
             'additional_notes' => 'nullable|string|max:2000',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'street_address.required' => 'Street address is required.',
+            'street_address.min' => 'Street address must be at least 5 characters.',
         ];
     }
 }

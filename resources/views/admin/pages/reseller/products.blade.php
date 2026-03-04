@@ -28,7 +28,6 @@
                 <div class="col-12 col-md-4 col-lg-3">
                     <select id="filterCategory" class="form-select">
                         <option value="">All Categories</option>
-                        <option value="medallion">Medallions</option>
                     </select>
                 </div>
             </div>
@@ -123,12 +122,10 @@
 
             function filterProducts() {
                 var search = $('#searchProducts').val().toLowerCase();
-                var category = $('#filterCategory').val();
                 $('.product-card').each(function() {
                     var $card = $(this);
                     var matchesSearch = !search || $card.data('search').indexOf(search) >= 0;
-                    var matchesCategory = !category || $card.data('search').indexOf('medallion') >= 0;
-                    $card.toggle(matchesSearch && matchesCategory);
+                    $card.toggle(matchesSearch);
                 });
             }
 
