@@ -234,7 +234,7 @@ class UserManagementController extends Controller
                 $resellerRequest->delete();
             }
             $user->assignRole('re-sellers');
-            ReSeller::create([
+            $reSeller = ReSeller::create([
                 'uuid' => Str::uuid(),
                 'phone' => $request->phone,
                 'website' => $request->website,
@@ -242,6 +242,7 @@ class UserManagementController extends Controller
                 'user_id' => $user->id,
             ]);
             DB::commit();
+            $this->ensureStripeCustomerForReseller($user, $reSeller);
             $data = [
                 'name' => $user->name,
                 'email' => $request->email,
@@ -362,7 +363,7 @@ class UserManagementController extends Controller
                 trim(implode(' ', array_filter([$app->state, $app->zip_code]))),
             ])));
 
-            ReSeller::create([
+            $reSeller = ReSeller::create([
                 'uuid' => Str::uuid(),
                 'phone' => $app->phone ?? $app->business_phone ?? '',
                 'website' => $app->website ?? '',
@@ -399,6 +400,7 @@ class UserManagementController extends Controller
             }
 
             DB::commit();
+            $this->ensureStripeCustomerForReseller($user, $reSeller);
             return response()->json([
                 'status' => true,
                 'message' => 'Reseller account created successfully.',
@@ -458,6 +460,60 @@ class UserManagementController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong.',
+            ]);
+        }
+    }
+
+    protected function ensureStripeCustomerForReseller(User $user, ?ReSeller $reSeller = null): void
+    {
+        $stripeSecret = config('services.stripe.secret');
+        if (empty($stripeSecret)) {
+            return;
+        }
+
+        try {
+            $stripe = new \Stripe\StripeClient($stripeSecret);
+            $existing = $stripe->customers->all([
+                'email' => $user->email,
+                'limit' => 1,
+            ]);
+
+            if (!empty($existing->data)) {
+                return;
+            }
+
+            $addressParts = $reSeller?->getAddressParts() ?? [];
+            $street = trim((string) ($addressParts['street_address'] ?? ''));
+            $city = trim((string) ($addressParts['city'] ?? ''));
+            $state = trim((string) ($addressParts['state'] ?? ''));
+            $postalCode = trim((string) ($addressParts['postal_code'] ?? ''));
+
+            $payload = [
+                'email' => $user->email,
+                'name' => $user->name,
+                'phone' => $reSeller?->phone ?: null,
+                'metadata' => [
+                    'app_source' => 'reseller_signup',
+                    'reseller_user_id' => (string) $user->id,
+                ],
+            ];
+
+            if ($street !== '' && $city !== '' && $state !== '') {
+                $payload['address'] = array_filter([
+                    'line1' => $street,
+                    'city' => $city,
+                    'state' => $state,
+                    'postal_code' => $postalCode ?: null,
+                    'country' => 'US',
+                ], fn($value) => $value !== null && $value !== '');
+            }
+
+            $stripe->customers->create($payload);
+        } catch (\Throwable $e) {
+            \Log::warning('Failed to create Stripe customer for reseller signup', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'error' => $e->getMessage(),
             ]);
         }
     }
