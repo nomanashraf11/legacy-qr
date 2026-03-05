@@ -44,6 +44,21 @@
                                         <p><strong>Phone:</strong> {{ $resel->phone ?? '—' }}</p>
                                         <p><strong>Shipping Address:</strong> {{ $resel->shipping_address ?? '—' }}</p>
                                         @endif
+                                        @if($order->payment_method === 'net30_invoice')
+                                            <p><strong>Payment Method:</strong> Net 30 Invoice</p>
+                                            <p><strong>Invoice Send Status:</strong>
+                                                @if($order->invoice_send_status === 'sent')
+                                                    <span class="badge bg-success">Sent</span>
+                                                @elseif($order->invoice_send_status === 'failed')
+                                                    <span class="badge bg-danger">Failed</span>
+                                                @else
+                                                    <span class="badge bg-secondary">Pending</span>
+                                                @endif
+                                            </p>
+                                            @if($order->invoice_send_error)
+                                                <p class="small text-danger mb-0"><strong>Send Error:</strong> {{ $order->invoice_send_error }}</p>
+                                            @endif
+                                        @endif
                                     </div>
                                 </div>
                                 @if($order->orderItems && $order->orderItems->isNotEmpty())
@@ -70,6 +85,11 @@
                                         <i class="uil uil-print me-1"></i>View / Print Invoice
                                     </a>
                                     @role('admin')
+                                    @if($order->payment_method === 'net30_invoice')
+                                        <button type="button" class="btn btn-outline-warning resendNet30InvoiceButton" id="{{ $order->uuid }}">
+                                            <i class="uil uil-envelope-redo me-1"></i>Resend Net 30 Invoice Email
+                                        </button>
+                                    @endif
                                     @if($order->status != \App\Models\Order::STATUS_DELIVERED)
                                         @if(!$order->accepted_at)
                                             <button type="button" class="btn btn-primary acceptOrderButton" id="{{ $order->uuid }}">

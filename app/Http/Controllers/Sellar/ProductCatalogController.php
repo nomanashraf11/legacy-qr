@@ -20,6 +20,26 @@ use Illuminate\View\View;
 
 class ProductCatalogController extends Controller
 {
+    protected function cartSessionKey(): string
+    {
+        return 'reseller_cart_' . (string) Auth::id();
+    }
+
+    protected function checkoutCartSessionKey(): string
+    {
+        return 'reseller_checkout_cart_' . (string) Auth::id();
+    }
+
+    protected function checkoutContextSessionKey(): string
+    {
+        return 'reseller_checkout_context_' . (string) Auth::id();
+    }
+
+    protected function net30ContextSessionKey(): string
+    {
+        return 'reseller_net30_context_' . (string) Auth::id();
+    }
+
     protected function buildCheckoutCartHash(array $cart): string
     {
         $normalized = collect($cart)
@@ -173,7 +193,7 @@ class ProductCatalogController extends Controller
             return $redirect;
         }
         $products = Product::with('priceTiers')->where('stock', '>', 0)->get();
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         $cartCount = collect($cart)->sum('quantity');
         return view('admin.pages.reseller.products', compact('products', 'cartCount'));
     }
@@ -186,7 +206,7 @@ class ProductCatalogController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         $key = array_search($request->product_id, array_column($cart, 'product_id'));
         $currentQty = ($key !== false) ? $cart[$key]['quantity'] : 0;
         $newQty = $currentQty + $request->quantity;
@@ -213,7 +233,7 @@ class ProductCatalogController extends Controller
             ];
         }
 
-        session(['reseller_cart' => $cart]);
+        session([$this->cartSessionKey() => $cart]);
         return response()->json([
             'status' => true,
             'message' => 'Added to cart',
@@ -226,7 +246,7 @@ class ProductCatalogController extends Controller
         if ($redirect = $this->ensureResellerCanPurchase()) {
             return $redirect;
         }
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         $cartItems = collect($cart)->map(function ($item) {
             $item['subtotal'] = $item['price'] * $item['quantity'];
             $product = Product::with('priceTiers')->find($item['product_id']);
@@ -244,13 +264,13 @@ class ProductCatalogController extends Controller
         $quantity = (int) $request->quantity;
 
         if ($quantity <= 0) {
-            $cart = session('reseller_cart', []);
+            $cart = session($this->cartSessionKey(), []);
             $cart = array_values(array_filter($cart, fn($i) => $i['product_id'] != $productId));
-            session(['reseller_cart' => $cart]);
+            session([$this->cartSessionKey() => $cart]);
             return response()->json(['status' => true, 'cart_count' => collect($cart)->sum('quantity')]);
         }
 
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         $updatedPrice = null;
         $itemFound = false;
         foreach ($cart as $i => $item) {
@@ -276,7 +296,7 @@ class ProductCatalogController extends Controller
         if (!$itemFound) {
             return response()->json(['status' => false, 'message' => 'Item not in cart'], 404);
         }
-        session(['reseller_cart' => $cart]);
+        session([$this->cartSessionKey() => $cart]);
         return response()->json([
             'status' => true,
             'cart_count' => collect($cart)->sum('quantity'),
@@ -287,9 +307,9 @@ class ProductCatalogController extends Controller
 
     public function removeFromCart(Request $request)
     {
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         $cart = array_values(array_filter($cart, fn($i) => $i['product_id'] != $request->product_id));
-        session(['reseller_cart' => $cart]);
+        session([$this->cartSessionKey() => $cart]);
         return response()->json(['status' => true, 'cart_count' => collect($cart)->sum('quantity')]);
     }
 
@@ -298,7 +318,7 @@ class ProductCatalogController extends Controller
         if ($redirect = $this->ensureResellerCanPurchase()) {
             return $redirect;
         }
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         if (empty($cart)) {
             return redirect()->route('reseller.products')->with('status', false)->with('message', 'Your cart is empty.');
         }
@@ -345,8 +365,8 @@ class ProductCatalogController extends Controller
         ]);
 
         session([
-            'reseller_checkout_cart' => $cart,
-            'reseller_checkout_context' => [
+            $this->checkoutCartSessionKey() => $cart,
+            $this->checkoutContextSessionKey() => [
                 'session_id' => $session->id,
                 'cart_hash' => $cartHash,
                 'user_id' => Auth::id(),
@@ -362,7 +382,7 @@ class ProductCatalogController extends Controller
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Invalid checkout session.');
         }
 
-        $checkoutContext = session('reseller_checkout_context', []);
+        $checkoutContext = session($this->checkoutContextSessionKey(), []);
         if (
             empty($checkoutContext['session_id']) ||
             !hash_equals((string) $checkoutContext['session_id'], $sessionId) ||
@@ -371,7 +391,7 @@ class ProductCatalogController extends Controller
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Checkout session validation failed.');
         }
 
-        $cart = session('reseller_checkout_cart', []);
+        $cart = session($this->checkoutCartSessionKey(), []);
         if (empty($cart)) {
             return redirect()->route('reseller.products')->with('status', false)->with('message', 'Session expired.');
         }
@@ -383,7 +403,7 @@ class ProductCatalogController extends Controller
 
         $existingOrder = Order::where('stripe_checkout_session_id', $sessionId)->first();
         if ($existingOrder) {
-            session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
+            session()->forget([$this->cartSessionKey(), $this->checkoutCartSessionKey(), $this->checkoutContextSessionKey()]);
             return redirect()->route('myOrders')->with('status', true)->with('message', 'Order already processed for this payment.');
         }
 
@@ -502,7 +522,7 @@ class ProductCatalogController extends Controller
             }
         }
 
-        session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
+        session()->forget([$this->cartSessionKey(), $this->checkoutCartSessionKey(), $this->checkoutContextSessionKey()]);
         return redirect()->route('myOrders')->with('status', true)->with('message', 'Order placed successfully!');
     }
 
@@ -512,7 +532,7 @@ class ProductCatalogController extends Controller
             return $redirect;
         }
 
-        $cart = session('reseller_cart', []);
+        $cart = session($this->cartSessionKey(), []);
         if (empty($cart)) {
             return redirect()->route('reseller.products')->with('status', false)->with('message', 'Your cart is empty.');
         }
@@ -523,7 +543,7 @@ class ProductCatalogController extends Controller
         }
 
         $cartHash = $this->buildCheckoutCartHash($cart);
-        $lastNet30Context = session('reseller_net30_context', []);
+        $lastNet30Context = session($this->net30ContextSessionKey(), []);
         if (
             !empty($lastNet30Context['cart_hash']) &&
             (string) $lastNet30Context['cart_hash'] === $cartHash &&
@@ -575,7 +595,7 @@ class ProductCatalogController extends Controller
                 'customer' => $customer->id,
                 'collection_method' => 'send_invoice',
                 'days_until_due' => $dueDays,
-                'auto_advance' => true,
+                'auto_advance' => false,
                 'metadata' => [
                     'app_source' => 'reseller_net30_checkout',
                     'reseller_user_id' => (string) $user->id,
@@ -584,7 +604,19 @@ class ProductCatalogController extends Controller
             ]);
 
             $finalized = $stripe->invoices->finalizeInvoice($invoice->id, []);
-            $stripe->invoices->sendInvoice($invoice->id, []);
+            $invoiceSent = true;
+            $invoiceSendError = null;
+            try {
+                $stripe->invoices->sendInvoice($invoice->id, []);
+            } catch (\Throwable $sendError) {
+                $invoiceSent = false;
+                $invoiceSendError = $sendError->getMessage();
+                \Log::warning('Net 30 invoice created but sendInvoice failed', [
+                    'reseller_user_id' => Auth::id(),
+                    'invoice_id' => $finalized->id ?? null,
+                    'error' => $invoiceSendError,
+                ]);
+            }
 
             $totalQty = collect($cart)->sum('quantity');
             $totalAmount = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
@@ -595,7 +627,9 @@ class ProductCatalogController extends Controller
                 'amount' => $totalAmount,
                 'status' => Order::STATUS_PENDING,
                 're_seller_id' => $reSeller->id,
-                'tracking_details' => 'Net 30 invoice sent. Awaiting payment.',
+                'tracking_details' => $invoiceSent
+                    ? 'Net 30 invoice sent. Awaiting payment.'
+                    : 'Net 30 invoice created. Email send pending; please check Stripe dashboard.',
                 'payment_method' => 'net30_invoice',
                 'stripe_customer_id' => $customer->id,
                 'stripe_payment_status' => 'unpaid',
@@ -604,6 +638,9 @@ class ProductCatalogController extends Controller
                 'stripe_invoice_status' => $finalized->status ?? null,
                 'payment_terms_days' => $dueDays,
                 'invoice_due_at' => !empty($finalized->due_date) ? Carbon::createFromTimestamp((int) $finalized->due_date) : null,
+                'invoice_sent_at' => $invoiceSent ? now() : null,
+                'invoice_send_status' => $invoiceSent ? 'sent' : 'failed',
+                'invoice_send_error' => $invoiceSendError,
             ]);
 
             foreach ($cart as $item) {
@@ -626,15 +663,20 @@ class ProductCatalogController extends Controller
             return redirect()->route('reseller.cart')->with('status', false)->with('message', 'Could not create Net 30 invoice. Please try again.');
         }
 
-        session()->forget(['reseller_cart', 'reseller_checkout_cart', 'reseller_checkout_context']);
+        session()->forget([$this->cartSessionKey(), $this->checkoutCartSessionKey(), $this->checkoutContextSessionKey()]);
         session([
-            'reseller_net30_context' => [
+            $this->net30ContextSessionKey() => [
                 'invoice_id' => $order->stripe_invoice_id,
                 'cart_hash' => $cartHash,
                 'created_at' => now()->toIso8601String(),
             ],
         ]);
 
-        return redirect()->route('myOrders')->with('status', true)->with('message', 'Net 30 invoice created and sent to your email.');
+        return redirect()->route('myOrders')->with('status', true)->with(
+            'message',
+            ($order->invoice_send_status === 'sent')
+                ? 'Net 30 invoice created and sent to your email.'
+                : 'Net 30 invoice created, but email send failed. Our team can resend it from admin.'
+        );
     }
 }

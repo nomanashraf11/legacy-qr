@@ -37,6 +37,40 @@ $(function () {
         orderId = $(this).attr("id");
         $("#deliverModal").modal("show");
     });
+    $(document).on("click", ".resendNet30InvoiceButton", function () {
+        var id = $(this).attr("id");
+        $.ajax({
+            url: "/resend_net30_invoice/" + id,
+            type: "POST",
+            data: {
+                _token:
+                    $('meta[name="csrf-token"]').attr("content") ||
+                    document.querySelector('input[name="_token"]')?.value,
+            },
+            success: function (response) {
+                toastr.options = {
+                    progressBar: true,
+                    closeButton: true,
+                    timeOut: 2000,
+                };
+                if (response.status === true) {
+                    toastr.success(response.message, "Success");
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    toastr.error(response.message, "Error");
+                }
+            },
+            error: function (xhr) {
+                toastr.error(
+                    xhr.responseJSON?.message ||
+                        "Could not resend invoice right now.",
+                    "Error"
+                );
+            },
+        });
+    });
     $("#changeStatusForm").on("submit", function (event) {
         event.preventDefault();
         var formData = new FormData(this);

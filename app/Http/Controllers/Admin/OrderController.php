@@ -285,4 +285,58 @@ class OrderController extends Controller
             ]);
         }
     }
+
+    public function resendNet30Invoice($uuid)
+    {
+        try {
+            $order = Order::with('reSeller.user')->where('uuid', $uuid)->firstOrFail();
+
+            if ($order->payment_method !== 'net30_invoice' || empty($order->stripe_invoice_id)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'This order is not a Net 30 invoice order.',
+                ], 422);
+            }
+
+            $stripeSecret = config('services.stripe.secret');
+            if (empty($stripeSecret)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Stripe is not configured.',
+                ], 422);
+            }
+
+            $stripe = new \Stripe\StripeClient($stripeSecret);
+            $stripe->invoices->sendInvoice($order->stripe_invoice_id, []);
+
+            $order->update([
+                'invoice_sent_at' => now(),
+                'invoice_send_status' => 'sent',
+                'invoice_send_error' => null,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Net 30 invoice email resent successfully.',
+            ]);
+        } catch (\Throwable $e) {
+            if (isset($order) && $order instanceof Order) {
+                $order->update([
+                    'invoice_send_status' => 'failed',
+                    'invoice_send_error' => $e->getMessage(),
+                ]);
+            }
+
+            Log::warning('Resend Net 30 invoice failed', [
+                'order_uuid' => $uuid,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Could not resend invoice right now.',
+            ], 500);
+        }
+    }
 }
