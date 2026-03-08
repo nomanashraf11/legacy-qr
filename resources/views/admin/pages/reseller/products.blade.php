@@ -54,7 +54,7 @@
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title mb-2 fw-semibold text-dark">{{ $product->name }}</h5>
                                 @if($product->description)
-                                    <p class="text-muted small mb-2 opacity-90">{{ Str::limit($product->description, 80) }}</p>
+                                    <p class="text-muted small mb-2 opacity-90 text-wrap text-break">{{ $product->description }}</p>
                                 @endif
 
                                 @if($product->priceTiers->isNotEmpty())
