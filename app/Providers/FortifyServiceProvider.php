@@ -7,11 +7,14 @@ use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 use App\Http\Responses\LogoutResponse;
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
 
@@ -42,6 +45,22 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::twoFactorChallengeView(function () {
             return view('auth.two-factor-challenge');
+        });
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->email)->first();
+            if (!$user || !Hash::check((string) $request->password, (string) $user->password)) {
+                return null;
+            }
+
+            // Admin accounts must keep 2FA enabled before login is allowed.
+            if ($user->hasRole('admin') && empty($user->two_factor_secret)) {
+                throw ValidationException::withMessages([
+                    Fortify::username() => 'Two-factor authentication is required for admin accounts. Please enable 2FA from your account settings.',
+                ]);
+            }
+
+            return $user;
         });
 
         RateLimiter::for('login', function (Request $request) {
