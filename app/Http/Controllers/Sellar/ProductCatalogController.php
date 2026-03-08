@@ -94,25 +94,34 @@ class ProductCatalogController extends Controller
         )));
     }
 
-    protected function buildCheckoutShippingOptions(): array
+    protected function resolveStandardShippingAmount(array $cart): int
+    {
+        $totalQty = max(0, (int) collect($cart)->sum('quantity'));
+        $tier1Amount = max(0, (int) config('services.stripe.shipping_standard_amount', 999));
+        $tier2Amount = max(0, (int) config('services.stripe.shipping_tier2_amount', 1299));
+        $tier3Amount = max(0, (int) config('services.stripe.shipping_tier3_amount', 1599));
+        $tier2MinQty = max(1, (int) config('services.stripe.shipping_tier2_min_qty', 25));
+        $tier3MinQty = max($tier2MinQty + 1, (int) config('services.stripe.shipping_tier3_min_qty', 50));
+
+        if ($totalQty >= $tier3MinQty) {
+            return $tier3Amount;
+        }
+        if ($totalQty >= $tier2MinQty) {
+            return $tier2Amount;
+        }
+
+        return $tier1Amount;
+    }
+
+    protected function buildCheckoutShippingOptions(array $cart): array
     {
         $standardId = (string) config('services.stripe.shipping_rate_standard_id', '');
-        $expressId = (string) config('services.stripe.shipping_rate_express_id', '');
-
-        $idBasedOptions = [];
         if ($standardId !== '') {
-            $idBasedOptions[] = ['shipping_rate' => $standardId];
-        }
-        if ($expressId !== '') {
-            $idBasedOptions[] = ['shipping_rate' => $expressId];
-        }
-        if (!empty($idBasedOptions)) {
-            return $idBasedOptions;
+            return [['shipping_rate' => $standardId]];
         }
 
         $currency = strtolower((string) config('services.stripe.shipping_currency', 'usd'));
-        $standardAmount = max(0, (int) config('services.stripe.shipping_standard_amount', 500));
-        $expressAmount = max(0, (int) config('services.stripe.shipping_express_amount', 1500));
+        $standardAmount = $this->resolveStandardShippingAmount($cart);
 
         return [
             [
@@ -126,20 +135,6 @@ class ProductCatalogController extends Controller
                     'delivery_estimate' => [
                         'minimum' => ['unit' => 'business_day', 'value' => 3],
                         'maximum' => ['unit' => 'business_day', 'value' => 5],
-                    ],
-                ],
-            ],
-            [
-                'shipping_rate_data' => [
-                    'type' => 'fixed_amount',
-                    'fixed_amount' => [
-                        'amount' => $expressAmount,
-                        'currency' => $currency,
-                    ],
-                    'display_name' => 'Express Shipping',
-                    'delivery_estimate' => [
-                        'minimum' => ['unit' => 'business_day', 'value' => 1],
-                        'maximum' => ['unit' => 'business_day', 'value' => 2],
                     ],
                 ],
             ],
@@ -356,7 +351,7 @@ class ProductCatalogController extends Controller
             'shipping_address_collection' => [
                 'allowed_countries' => $this->getCheckoutAllowedCountries(),
             ],
-            'shipping_options' => $this->buildCheckoutShippingOptions(),
+            'shipping_options' => $this->buildCheckoutShippingOptions($cart),
             'metadata' => [
                 'app_source' => 'reseller_cart_checkout',
                 'reseller_user_id' => (string) Auth::id(),
