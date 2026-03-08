@@ -100,8 +100,8 @@ class ProductCatalogController extends Controller
         $tier1Amount = max(0, (int) config('services.stripe.shipping_standard_amount', 999));
         $tier2Amount = max(0, (int) config('services.stripe.shipping_tier2_amount', 1299));
         $tier3Amount = max(0, (int) config('services.stripe.shipping_tier3_amount', 1599));
-        $tier2MinQty = max(1, (int) config('services.stripe.shipping_tier2_min_qty', 25));
-        $tier3MinQty = max($tier2MinQty + 1, (int) config('services.stripe.shipping_tier3_min_qty', 50));
+        $tier2MinQty = max(1, (int) config('services.stripe.shipping_tier2_min_qty', 11));
+        $tier3MinQty = max($tier2MinQty + 1, (int) config('services.stripe.shipping_tier3_min_qty', 21));
 
         if ($totalQty >= $tier3MinQty) {
             return $tier3Amount;
