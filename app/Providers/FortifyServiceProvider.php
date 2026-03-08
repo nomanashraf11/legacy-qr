@@ -53,8 +53,9 @@ class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
-            // Admin accounts must keep 2FA enabled before login is allowed.
-            if ($user->hasRole('admin') && empty($user->two_factor_secret)) {
+            // Optional rollout: enforce admin 2FA only when explicitly enabled.
+            $forceAdminTwoFactor = filter_var(env('FORCE_ADMIN_2FA', false), FILTER_VALIDATE_BOOL);
+            if ($forceAdminTwoFactor && $user->hasRole('admin') && empty($user->two_factor_secret)) {
                 throw ValidationException::withMessages([
                     Fortify::username() => 'Two-factor authentication is required for admin accounts. Please enable 2FA from your account settings.',
                 ]);
