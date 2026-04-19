@@ -235,84 +235,78 @@ export const FamilyTree = () => {
                                             >
                                                 {showPaternalBranch ? (
                                                     <div className="paternal ft-branch ft-branch--paternal">
-                                                        <div className="family-tree-gp-row">
-                                                            {!hasGreatGrandparentFatherSide ? (
-                                                                <div
-                                                                    className="ft-tier-spacer"
-                                                                    aria-hidden
-                                                                />
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                            {sortedRelations.map(
-                                                                (
-                                                                    relation,
-                                                                    index
-                                                                ) => {
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "paternalGreatGrandfather".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation?.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
+                                                        {hasGreatGrandparentFatherSide ? (
+                                                            <div className="family-tree-gp-row">
+                                                                {sortedRelations.map(
+                                                                    (
+                                                                        relation,
+                                                                        index
+                                                                    ) => {
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "paternalGreatGrandfather".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation?.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "paternalGreatGrandmother".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        return null;
                                                                     }
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "paternalGreatGrandmother".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
-                                                                    }
-                                                                    return null;
-                                                                }
-                                                            )}
-                                                        </div>
+                                                                )}
+                                                            </div>
+                                                        ) : null}
                                                         {hasGreatGrandparentFatherSide &&
                                                             hasGrandparentFatherSide && (
                                                                 <div
@@ -320,84 +314,78 @@ export const FamilyTree = () => {
                                                                     aria-hidden
                                                                 />
                                                             )}
-                                                        <div className="family-tree-gp-row">
-                                                            {!hasGrandparentFatherSide ? (
-                                                                <div
-                                                                    className="ft-tier-spacer"
-                                                                    aria-hidden
-                                                                />
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                            {sortedRelations.map(
-                                                                (
-                                                                    relation,
-                                                                    index
-                                                                ) => {
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "paternalGrandfather".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation?.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
+                                                        {hasGrandparentFatherSide ? (
+                                                            <div className="family-tree-gp-row">
+                                                                {sortedRelations.map(
+                                                                    (
+                                                                        relation,
+                                                                        index
+                                                                    ) => {
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "paternalGrandfather".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation?.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "paternalGrandmother".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        return null;
                                                                     }
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "paternalGrandmother".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
-                                                                    }
-                                                                    return null;
-                                                                }
-                                                            )}
-                                                        </div>
+                                                                )}
+                                                            </div>
+                                                        ) : null}
                                                         {sortedRelations.map(
                                                             (
                                                                 relation,
@@ -463,84 +451,78 @@ export const FamilyTree = () => {
 
                                                 {showMaternalBranch ? (
                                                     <div className="maternal ft-branch ft-branch--maternal">
-                                                        <div className="family-tree-gp-row">
-                                                            {!hasGreatGrandparentMotherSide ? (
-                                                                <div
-                                                                    className="ft-tier-spacer"
-                                                                    aria-hidden
-                                                                />
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                            {sortedRelations.map(
-                                                                (
-                                                                    relation,
-                                                                    index
-                                                                ) => {
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "maternalGreatGrandfather".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
+                                                        {hasGreatGrandparentMotherSide ? (
+                                                            <div className="family-tree-gp-row">
+                                                                {sortedRelations.map(
+                                                                    (
+                                                                        relation,
+                                                                        index
+                                                                    ) => {
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "maternalGreatGrandfather".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "maternalGreatGrandmother".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        return null;
                                                                     }
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "maternalGreatGrandmother".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
-                                                                    }
-                                                                    return null;
-                                                                }
-                                                            )}
-                                                        </div>
+                                                                )}
+                                                            </div>
+                                                        ) : null}
                                                         {hasGreatGrandparentMotherSide &&
                                                             hasGrandparentMotherSide && (
                                                                 <div
@@ -548,84 +530,78 @@ export const FamilyTree = () => {
                                                                     aria-hidden
                                                                 />
                                                             )}
-                                                        <div className="family-tree-gp-row">
-                                                            {!hasGrandparentMotherSide ? (
-                                                                <div
-                                                                    className="ft-tier-spacer"
-                                                                    aria-hidden
-                                                                />
-                                                            ) : (
-                                                                ""
-                                                            )}
-                                                            {sortedRelations.map(
-                                                                (
-                                                                    relation,
-                                                                    index
-                                                                ) => {
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "maternalGrandfather".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
+                                                        {hasGrandparentMotherSide ? (
+                                                            <div className="family-tree-gp-row">
+                                                                {sortedRelations.map(
+                                                                    (
+                                                                        relation,
+                                                                        index
+                                                                    ) => {
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "maternalGrandfather".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        if (
+                                                                            relation.name.toUpperCase() ===
+                                                                            "maternalGrandmother".toUpperCase()
+                                                                        ) {
+                                                                            return (
+                                                                                <FamilyTreePersonCard
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    personName={
+                                                                                        relation.person_name
+                                                                                    }
+                                                                                    imageSrc={
+                                                                                        relation.image
+                                                                                            ? transformImageUrl(
+                                                                                                  relation.image
+                                                                                              )
+                                                                                            : undefined
+                                                                                    }
+                                                                                    relationLabel={formatRelations(
+                                                                                        relation.name
+                                                                                    )}
+                                                                                    lifeSpan={formatRelationLifeSpan(
+                                                                                        relation?.dob,
+                                                                                        relation?.dod
+                                                                                    )}
+                                                                                    variant="ancestor"
+                                                                                />
+                                                                            );
+                                                                        }
+                                                                        return null;
                                                                     }
-                                                                    if (
-                                                                        relation.name.toUpperCase() ===
-                                                                        "maternalGrandmother".toUpperCase()
-                                                                    ) {
-                                                                        return (
-                                                                            <FamilyTreePersonCard
-                                                                                key={
-                                                                                    index
-                                                                                }
-                                                                                personName={
-                                                                                    relation.person_name
-                                                                                }
-                                                                                imageSrc={
-                                                                                    relation.image
-                                                                                        ? transformImageUrl(
-                                                                                              relation.image
-                                                                                          )
-                                                                                        : undefined
-                                                                                }
-                                                                                relationLabel={formatRelations(
-                                                                                    relation.name
-                                                                                )}
-                                                                                lifeSpan={formatRelationLifeSpan(
-                                                                                    relation?.dob,
-                                                                                    relation?.dod
-                                                                                )}
-                                                                                variant="ancestor"
-                                                                            />
-                                                                        );
-                                                                    }
-                                                                    return null;
-                                                                }
-                                                            )}
-                                                        </div>
+                                                                )}
+                                                            </div>
+                                                        ) : null}
                                                         {sortedRelations.map(
                                                             (
                                                                 relation,

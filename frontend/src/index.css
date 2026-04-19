@@ -389,14 +389,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     box-sizing: border-box;
 }
 
-.ft-tier-spacer {
-    width: min(var(--ft-card-width, 222px), 100%);
-    min-height: 7.5rem;
-    flex-shrink: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
 /* Person tiles */
 .family-tree-zoom-viewport .ft-card {
     position: relative;
