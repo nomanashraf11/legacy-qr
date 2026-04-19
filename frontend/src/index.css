@@ -376,6 +376,17 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     box-shadow: 0 0 0 1px rgba(244, 114, 182, 0.04) inset;
 }
 
+/* Grid slot when paired parents have no ancestors on that side — no decorated shell */
+.ft-branch-cell--bare {
+    padding: 0;
+    border: none;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    min-height: 0;
+    min-width: 0;
+}
+
 .family-tree-gp-row {
     display: flex;
     flex-direction: row;

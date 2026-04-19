@@ -18,7 +18,8 @@ vendor/*
 .env
 test-credentials.txt
 __MACOSX/
-.DS_Store# Large binaries and user uploads (exceed GitHub 100MB limit)
+.DS_Store
+# Large binaries and user uploads (exceed GitHub 100MB limit)
 public/ffmpeg/
 public/windows-ffmpeg/
 public/images/profile/photos/

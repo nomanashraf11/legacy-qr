@@ -97,7 +97,9 @@ export const FamilyTree = () => {
 
     /**
      * When parents are paired they render in `family-tree-parents-row`, not inside
-     * `.ft-branch`. Empty branch shells still had border/background (thin “ghost” boxes).
+     * `.ft-branch`. Skip border/gradient on empty shells (`ft-branch-cell--bare`) so we
+     * do not get ghost outlines, but keep `.paternal` / `.maternal` nodes so the spouse
+     * grid columns still line up with father/mother below.
      */
     const paternalBranchHasContent =
         hasGreatGrandparentFatherSide ||
@@ -246,9 +248,14 @@ export const FamilyTree = () => {
                                                 }`}
                                                 ref={treeRef}
                                             >
-                                                {showPaternalBranch &&
-                                                paternalBranchHasContent ? (
-                                                    <div className="paternal ft-branch ft-branch--paternal">
+                                                {showPaternalBranch ? (
+                                                    <div
+                                                        className={
+                                                            paternalBranchHasContent
+                                                                ? "paternal ft-branch ft-branch--paternal"
+                                                                : "paternal ft-branch-cell--bare"
+                                                        }
+                                                    >
                                                         {hasGreatGrandparentFatherSide ? (
                                                             <div className="family-tree-gp-row">
                                                                 {sortedRelations.map(
@@ -463,9 +470,14 @@ export const FamilyTree = () => {
                                                     ""
                                                 )}
 
-                                                {showMaternalBranch &&
-                                                maternalBranchHasContent ? (
-                                                    <div className="maternal ft-branch ft-branch--maternal">
+                                                {showMaternalBranch ? (
+                                                    <div
+                                                        className={
+                                                            maternalBranchHasContent
+                                                                ? "maternal ft-branch ft-branch--maternal"
+                                                                : "maternal ft-branch-cell--bare"
+                                                        }
+                                                    >
                                                         {hasGreatGrandparentMotherSide ? (
                                                             <div className="family-tree-gp-row">
                                                                 {sortedRelations.map(
