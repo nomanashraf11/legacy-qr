@@ -11,4 +11,4 @@ export const LIVE_URL = import.meta.env.VITE_LIVE_URL || "https://qr.livinglegac
 export const BASE_URL = import.meta.env.VITE_BASE_URL || "https://legacy.livinglegacyqr.com/";
 
 // API Base URL - defaults to production, override with .env.local for local development
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://www.livinglegacyqr.xyz/api";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://www.livinglegacyqr.com/api";

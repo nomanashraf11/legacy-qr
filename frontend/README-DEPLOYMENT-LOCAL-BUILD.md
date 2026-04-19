@@ -109,7 +109,7 @@ sudo chmod -R 755 /var/www/html/public/
 ## Environment Variables
 
 The build script automatically sets production environment variables:
-- `VITE_API_BASE_URL=https://www.livinglegacyqr.xyz/api`
+- `VITE_API_BASE_URL=https://www.livinglegacyqr.com/api`
 - `VITE_GOOGLE_API_KEY=...`
 - `VITE_SPOTIFY_CLIENT_ID=...`
 - `VITE_LIVE_URL=https://qr.livinglegacyqr.com/`

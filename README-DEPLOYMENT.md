@@ -51,7 +51,7 @@ On your production server:
    ```bash
    cd frontend
    npm install
-   export VITE_API_BASE_URL="https://www.livinglegacyqr.xyz/api"
+   export VITE_API_BASE_URL="https://www.livinglegacyqr.com/api"
    npm run build
    cd ..
    ```

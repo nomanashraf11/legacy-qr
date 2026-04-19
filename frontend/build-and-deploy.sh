@@ -14,7 +14,7 @@ echo -e "${BLUE}🔨 Building frontend for production locally...${NC}"
 
 # Build frontend with production environment variables
 cd frontend
-export VITE_API_BASE_URL="https://www.livinglegacyqr.xyz/api"
+export VITE_API_BASE_URL="https://www.livinglegacyqr.com/api"
 export VITE_GOOGLE_API_KEY="AIzaSyBSF_cWChkYEVRE337dWmKl1usv9asM1As"
 export VITE_SPOTIFY_CLIENT_ID="a079012386e644ba81a345fed291157b"
 export VITE_LIVE_URL="https://qr.livinglegacyqr.com/"
