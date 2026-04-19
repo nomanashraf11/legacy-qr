@@ -95,6 +95,19 @@ export const FamilyTree = () => {
     const parentsPaired =
         showPaternalBranch && showMaternalBranch && hasFather && hasMother;
 
+    /**
+     * When parents are paired they render in `family-tree-parents-row`, not inside
+     * `.ft-branch`. Empty branch shells still had border/background (thin “ghost” boxes).
+     */
+    const paternalBranchHasContent =
+        hasGreatGrandparentFatherSide ||
+        hasGrandparentFatherSide ||
+        (!parentsPaired && hasFather);
+    const maternalBranchHasContent =
+        hasGreatGrandparentMotherSide ||
+        hasGrandparentMotherSide ||
+        (!parentsPaired && hasMother);
+
     const fatherRelation = sortedRelations.find(
         (r) => (r.name || "").toUpperCase() === "FATHER"
     );
@@ -233,7 +246,8 @@ export const FamilyTree = () => {
                                                 }`}
                                                 ref={treeRef}
                                             >
-                                                {showPaternalBranch ? (
+                                                {showPaternalBranch &&
+                                                paternalBranchHasContent ? (
                                                     <div className="paternal ft-branch ft-branch--paternal">
                                                         {hasGreatGrandparentFatherSide ? (
                                                             <div className="family-tree-gp-row">
@@ -449,7 +463,8 @@ export const FamilyTree = () => {
                                                     ""
                                                 )}
 
-                                                {showMaternalBranch ? (
+                                                {showMaternalBranch &&
+                                                maternalBranchHasContent ? (
                                                     <div className="maternal ft-branch ft-branch--maternal">
                                                         {hasGreatGrandparentMotherSide ? (
                                                             <div className="family-tree-gp-row">
