@@ -19,8 +19,9 @@ On your **local machine**:
 ```
 
 This will:
-- Build the frontend with production environment variables
-- Create optimized production build in `frontend/dist/`
+
+-   Build the frontend with production environment variables
+-   Create optimized production build in `frontend/dist/`
 
 ### Step 2: Copy Build Files to Server
 
@@ -31,10 +32,12 @@ On your **local machine**:
 ```
 
 The script will prompt you for:
-- Server details (user@host)
-- Remote path (e.g., `/var/www/html/public/`)
+
+-   Server details (user@host)
+-   Remote path (e.g., `/var/www/html/public/`)
 
 **Or manually:**
+
 ```bash
 scp -r frontend/dist/* user@your-server.com:/var/www/html/public/
 ```
@@ -48,11 +51,12 @@ On your **production server**:
 ```
 
 This will:
-- Pull latest code from git
-- Install backend dependencies
-- Clear and cache Laravel configs
-- Run database migrations
-- Set proper permissions
+
+-   Pull latest code from git
+-   Install backend dependencies
+-   Clear and cache Laravel configs
+-   Run database migrations
+-   Set proper permissions
 
 ## Alternative: One-Line Copy
 
@@ -68,15 +72,17 @@ scp -r frontend/dist/* user@server.com:/var/www/html/public/
 
 ## Server Paths (Common)
 
-- **Apache**: `/var/www/html/public/`
-- **Nginx**: `/var/www/your-app/public/`
-- **cPanel**: `/home/username/public_html/`
-- **Laravel Forge**: `/home/forge/your-app/public/`
+-   **Apache**: `/var/www/html/public/`
+-   **Nginx**: `/var/www/your-app/public/`
+-   **cPanel**: `/home/username/public_html/`
+-   **Laravel Forge**: `/home/forge/your-app/public/`
 
 ## Troubleshooting
 
 ### Permission Issues
+
 If you get permission errors, you may need to:
+
 ```bash
 # On server, set ownership
 sudo chown -R www-data:www-data /var/www/html/public/
@@ -84,14 +90,16 @@ sudo chmod -R 755 /var/www/html/public/
 ```
 
 ### Files Not Updating
+
 1. Clear browser cache (hard refresh: Cmd+Shift+R / Ctrl+Shift+R)
 2. Check file permissions on server
 3. Verify files were copied correctly
 
 ### Build Fails Locally
-- Make sure you have Node.js and npm installed
-- Run `npm install` in frontend directory first
-- Check for any errors in the build output
+
+-   Make sure you have Node.js and npm installed
+-   Run `npm install` in frontend directory first
+-   Check for any errors in the build output
 
 ## Quick Reference
 
@@ -109,10 +117,11 @@ sudo chmod -R 755 /var/www/html/public/
 ## Environment Variables
 
 The build script automatically sets production environment variables:
-- `VITE_API_BASE_URL=https://www.livinglegacyqr.com/api`
-- `VITE_GOOGLE_API_KEY=...`
-- `VITE_SPOTIFY_CLIENT_ID=...`
-- `VITE_LIVE_URL=https://qr.livinglegacyqr.com/`
-- `VITE_BASE_URL=https://legacy.livinglegacyqr.com/`
+
+-   `VITE_API_BASE_URL=https://www.livinglegacyqr.xyz/api`
+-   `VITE_GOOGLE_API_KEY=...`
+-   `VITE_SPOTIFY_CLIENT_ID=...`
+-   `VITE_LIVE_URL=https://qr.livinglegacyqr.com/`
+-   `VITE_BASE_URL=https://legacy.livinglegacyqr.com/`
 
 No need to set these manually!

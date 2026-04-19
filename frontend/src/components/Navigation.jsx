@@ -9,11 +9,13 @@ import {
 } from "../redux";
 import { useQueryClient } from "@tanstack/react-query";
 import { useFetchQrCodesData } from "../services/index.js";
+import { mergeTabVisibility } from "../constants/tabVisibility";
 
 export const Navigation = ({
     setOpenLoginModal,
     refetch,
     setOpenChangePasswordModal,
+    tabVisibility,
 }) => {
     const id = useAppSelector(getID);
     const token = useAppSelector(getAuthToken);
@@ -27,6 +29,8 @@ export const Navigation = ({
         return ids?.includes(id);
     };
 
+    const vis = mergeTabVisibility(tabVisibility);
+
     const navs = [
         {
             id: "legacy-link",
@@ -37,26 +41,38 @@ export const Navigation = ({
             id: "family-link",
             title: "Family Tree",
             to: `/${id}/family-tree`,
+            tabKey: "family_tree",
         },
         {
             id: "gallery-link",
             title: "Gallery",
             to: `/${id}/gallery`,
+            tabKey: "gallery",
         },
         {
             id: "timeline-link",
             title: "Timeline",
             to: `/${id}/timeline`,
+            tabKey: "timeline",
         },
         {
             id: "tribute-link",
             title: "Tribute",
             to: `/${id}/tribute`,
+            tabKey: "tribute",
         },
         {
             title: "hamburger",
         },
-    ];
+    ].filter((nav) => {
+        if (!nav.to) {
+            return true;
+        }
+        if (!nav.tabKey) {
+            return true;
+        }
+        return vis[nav.tabKey] !== false;
+    });
     return (
         <div className="fixed top-2 left-0 right-0 z-50 w-full flex justify-center">
             <div

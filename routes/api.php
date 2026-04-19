@@ -41,6 +41,7 @@ Route::post('/email/verify-api', [VerificationController::class, 'verify']);
 
 Route::middleware('auth:sanctum', 'apiBanned')->group(function () {
     Route::post('{uuid}/add_bio', [ProfileController::class, 'addBio']);
+    Route::patch('{uuid}/tab_visibility', [ProfileController::class, 'updateTabVisibility']);
 
     Route::post('{uuid}/add_photo', [ProfileController::class, 'addPhotos']);
     Route::post('edit/photo/{uuid}', [ProfileController::class, 'addCaption']);

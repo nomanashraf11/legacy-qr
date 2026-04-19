@@ -36,7 +36,11 @@ import { RxInstagramLogo } from "react-icons/rx";
 import { ChangePasswordModal } from "../components/ChangePasswordModal";
 import { API_BASE_URL, BASE_URL, LIVE_URL } from "../config";
 import { useTour } from "@reactour/tour";
-import { dateMMDDYYYYFormat, objectToFormData, textWillWrap } from "../utils";
+import {
+    formatRelationLifeSpan,
+    objectToFormData,
+    textWillWrap,
+} from "../utils";
 import { Spotify } from "react-spotify-embed";
 import { IoClose } from "react-icons/io5";
 import { GrView } from "react-icons/gr";
@@ -378,12 +382,13 @@ export const AppLayout = () => {
                             setOpenChangePasswordModal={
                                 setOpenChangePasswordModal
                             }
+                            tabVisibility={data?.Details?.tab_visibility}
                         />
                         {!pathname.includes("settings") && (
                             <>
                                 <div
                                     className={
-                                        "min-w-full overflow-hidden border-white/10 min-h-40 md:min-h-[300px] border mt-12 md:mt-6 h-auto rounded-md flex items-center justify-center"
+                                        "min-w-full overflow-hidden border-white/10 border mt-12 md:mt-6 rounded-md flex items-center justify-center aspect-video max-h-[min(100vw,400px)] w-full bg-black/40"
                                     }
                                 >
                                     {data?.Details?.cover_picture &&
@@ -391,7 +396,8 @@ export const AppLayout = () => {
                                         "."
                                     ) ? (
                                         <img
-                                            className="w-full h-auto min-h-[100px] max-h-[400px]"
+                                            className="w-full h-full object-cover object-center"
+                                            alt=""
                                             src={
                                                 data?.Details?.cover_picture ||
                                                 ""
@@ -596,25 +602,14 @@ export const AppLayout = () => {
                                                                                     : "text-black"
                                                                             }  font-normal mt-[5px]`}
                                                                         >
-                                                                            {dateMMDDYYYYFormat(
+                                                                            {formatRelationLifeSpan(
                                                                                 data
                                                                                     ?.Details
-                                                                                    ?.dob
-                                                                            )}{" "}
-                                                                            -{" "}
-                                                                            {data
-                                                                                ?.Details
-                                                                                ?.dod &&
-                                                                            data
-                                                                                ?.Details
-                                                                                ?.dod !==
-                                                                                ""
-                                                                                ? dateMMDDYYYYFormat(
-                                                                                      data
-                                                                                          ?.Details
-                                                                                          ?.dod
-                                                                                  )
-                                                                                : "Present"}
+                                                                                    ?.dob,
+                                                                                data
+                                                                                    ?.Details
+                                                                                    ?.dod
+                                                                            )}
                                                                         </p>
                                                                     </div>
                                                                 )}
@@ -841,50 +836,22 @@ export const AppLayout = () => {
                                                                                             : "text-black"
                                                                                     }  font-normal mt-[5px]`}
                                                                                 >
-                                                                                    {dateMMDDYYYYFormat(
-                                                                                        data?.Details?.relations?.filter(
-                                                                                            (
-                                                                                                el
-                                                                                            ) => {
-                                                                                                return (
+                                                                                    {(() => {
+                                                                                        const spouse =
+                                                                                            data?.Details?.relations?.find(
+                                                                                                (
+                                                                                                    el
+                                                                                                ) =>
                                                                                                     el.name ===
                                                                                                         "SPOUSE" &&
                                                                                                     el.is_legacy ===
                                                                                                         true
-                                                                                                );
-                                                                                            }
-                                                                                        )[0]
-                                                                                            ?.dob
-                                                                                    )}
-                                                                                    {data?.Details?.relations?.filter(
-                                                                                        (
-                                                                                            el
-                                                                                        ) => {
-                                                                                            return (
-                                                                                                el.name ===
-                                                                                                    "SPOUSE" &&
-                                                                                                el.is_legacy ===
-                                                                                                    true
                                                                                             );
-                                                                                        }
-                                                                                    )[0]
-                                                                                        ?.dod
-                                                                                        ? `- ${dateMMDDYYYYFormat(
-                                                                                              data?.Details?.relations?.filter(
-                                                                                                  (
-                                                                                                      el
-                                                                                                  ) => {
-                                                                                                      return (
-                                                                                                          el.name ===
-                                                                                                              "SPOUSE" &&
-                                                                                                          el.is_legacy ===
-                                                                                                              true
-                                                                                                      );
-                                                                                                  }
-                                                                                              )[0]
-                                                                                                  ?.dod
-                                                                                          )}`
-                                                                                        : "- Present"}
+                                                                                        return formatRelationLifeSpan(
+                                                                                            spouse?.dob,
+                                                                                            spouse?.dod
+                                                                                        );
+                                                                                    })()}
                                                                                 </p>
                                                                             </div>
                                                                         </div>

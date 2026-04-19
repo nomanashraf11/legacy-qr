@@ -15,6 +15,7 @@ use App\Models\Relation;
 use App\Models\Timeline;
 use App\Models\Tribute;
 use App\Models\User;
+use App\Support\TabVisibility;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,10 @@ class ProfileController extends Controller
             'latitude' => 'nullable|string',
             'badge' => 'nullable|string',
             'spouse_badge' => 'nullable|string',
-            'dark_theme' => 'nullable|boolean'
+            'dark_theme' => 'nullable|boolean',
+            'remove_profile_picture' => 'nullable|boolean',
+            'remove_cover_picture' => 'nullable|boolean',
+            'stock_cover' => 'nullable|string|max:128',
         ]);
         if ($validator->fails()) {
             return response()->json([
@@ -75,52 +79,67 @@ class ProfileController extends Controller
             if (Auth::user()->localUser->id == $link->local_user_id) {
 
                 if ($link->profile) {
-                    $profilePictureName = $link->profile->profile_picture;
-                    $coverPictureName = $link->profile->cover_picture;
+                    $profilePictureName = $link->profile->profile_picture ?: '';
+                    $coverPictureName = $link->profile->cover_picture ?: '';
+                    $previousProfileFile = $profilePictureName;
+                    $previousCoverFile = $coverPictureName;
+
                     if ($request->hasFile('profile_picture')) {
+                        $this->deleteStoredProfileFile($previousProfileFile);
                         $profilePicture = $request->file('profile_picture');
                         $profilePictureName = time().'_'.$profilePicture->getClientOriginalName();
                         try {
                             $disk = config('filesystems.default');
                             $path = Storage::disk($disk)->putFileAs('images/profile/profile_pictures', $profilePicture, $profilePictureName);
-                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
-                            \Log::info('Profile picture uploaded to ' . $disk, ['path' => $path]);
+                            \Log::info('Profile picture uploaded to '.$disk, ['path' => $path]);
                         } catch (\Exception $e) {
                             \Log::error('S3 upload failed, using local storage', [
                                 'error' => $e->getMessage(),
-                                'disk' => config('filesystems.default')
+                                'disk' => config('filesystems.default'),
                             ]);
-                            // Fallback to local storage
                             $localDir = public_path('images/profile/profile_pictures');
-                            if (!file_exists($localDir)) {
+                            if (! file_exists($localDir)) {
                                 mkdir($localDir, 0777, true);
                             }
                             $profilePicture->move($localDir, $profilePictureName);
                         }
+                    } elseif ($request->boolean('remove_profile_picture')) {
+                        $this->deleteStoredProfileFile($previousProfileFile);
+                        $profilePictureName = '';
                     }
+
                     if ($request->hasFile('cover_picture')) {
+                        $this->deleteStoredCoverFile($previousCoverFile);
                         $coverPicture = $request->file('cover_picture');
                         $coverPictureName = time().'_'.$coverPicture->getClientOriginalName();
                         try {
                             $disk = config('filesystems.default');
                             $path = Storage::disk($disk)->putFileAs('images/profile/cover_pictures', $coverPicture, $coverPictureName);
-                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
-                            \Log::info('Cover picture uploaded to ' . $disk, ['path' => $path]);
+                            \Log::info('Cover picture uploaded to '.$disk, ['path' => $path]);
                         } catch (\Exception $e) {
                             \Log::error('S3 upload failed, using local storage', [
                                 'error' => $e->getMessage(),
-                                'disk' => config('filesystems.default')
+                                'disk' => config('filesystems.default'),
                             ]);
-                            // Fallback to local storage
                             $localDir = public_path('images/profile/cover_pictures');
-                            if (!file_exists($localDir)) {
+                            if (! file_exists($localDir)) {
                                 mkdir($localDir, 0777, true);
                             }
                             $coverPicture->move($localDir, $coverPictureName);
                         }
+                    } elseif ($request->filled('stock_cover')) {
+                        $pick = basename((string) $request->input('stock_cover'));
+                        $allowed = config('living_legacy.stock_covers', []);
+                        if (in_array($pick, $allowed, true)) {
+                            $this->deleteStoredCoverFile($previousCoverFile);
+                            $coverPictureName = 'stock/'.$pick;
+                        }
+                    } elseif ($request->boolean('remove_cover_picture')) {
+                        $this->deleteStoredCoverFile($previousCoverFile);
+                        $coverPictureName = '';
                     }
 
-                    $link->profile->update([
+                    $profileUpdate = [
                         'name' => $request->name,
                         'title' => $request->title,
                         'dob' => $request->dob,
@@ -136,13 +155,19 @@ class ProfileController extends Controller
                         'youtube' => $request->youtube,
                         'spotify' => $request->spotify,
                         'bio' => $request->bio,
-                        'longitude' => $request->longitude,
-                        'latitude' => $request->latitude,
                         'link_id' => $link->id,
                         'badge' => $request->badge ?? '',
                         'spouse_badge' => $request->spouse_badge ?? '',
                         'dark_theme' => $request->dark_theme ?? $link->profile->dark_theme
-                    ]);
+                    ];
+                    // Only touch map fields when the client sends them (full legacy form sends both;
+                    // partial updates e.g. theme toggle must not wipe coordinates).
+                    if ($request->has('latitude') || $request->has('longitude')) {
+                        $profileUpdate['latitude'] = $request->filled('latitude') ? $request->latitude : null;
+                        $profileUpdate['longitude'] = $request->filled('longitude') ? $request->longitude : null;
+                    }
+
+                    $link->profile->update($profileUpdate);
 
                     $relations = $request->input('relations');
 
@@ -173,48 +198,58 @@ class ProfileController extends Controller
                     ]);
                 } else {
 
+                    $profilePictureName = '';
+                    $coverPictureName = '';
+
                     if ($request->hasFile('profile_picture')) {
                         $profilePicture = $request->file('profile_picture');
                         $profilePictureName = time().'_'.$profilePicture->getClientOriginalName();
                         try {
                             $disk = config('filesystems.default');
                             $path = Storage::disk($disk)->putFileAs('images/profile/profile_pictures', $profilePicture, $profilePictureName);
-                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
-                            \Log::info('Profile picture uploaded to ' . $disk, ['path' => $path]);
+                            \Log::info('Profile picture uploaded to '.$disk, ['path' => $path]);
                         } catch (\Exception $e) {
                             \Log::error('S3 upload failed, using local storage', [
                                 'error' => $e->getMessage(),
-                                'disk' => config('filesystems.default')
+                                'disk' => config('filesystems.default'),
                             ]);
-                            // Fallback to local storage
                             $localDir = public_path('images/profile/profile_pictures');
-                            if (!file_exists($localDir)) {
+                            if (! file_exists($localDir)) {
                                 mkdir($localDir, 0777, true);
                             }
                             $profilePicture->move($localDir, $profilePictureName);
                         }
+                    } elseif ($request->boolean('remove_profile_picture')) {
+                        $profilePictureName = '';
                     }
+
                     if ($request->hasFile('cover_picture')) {
                         $coverPicture = $request->file('cover_picture');
                         $coverPictureName = time().'_'.$coverPicture->getClientOriginalName();
                         try {
                             $disk = config('filesystems.default');
                             $path = Storage::disk($disk)->putFileAs('images/profile/cover_pictures', $coverPicture, $coverPictureName);
-                            // Note: setVisibility removed - bucket doesn't allow ACLs, bucket policy handles public access
-                            \Log::info('Cover picture uploaded to ' . $disk, ['path' => $path]);
+                            \Log::info('Cover picture uploaded to '.$disk, ['path' => $path]);
                         } catch (\Exception $e) {
                             \Log::error('S3 upload failed, using local storage', [
                                 'error' => $e->getMessage(),
-                                'disk' => config('filesystems.default')
+                                'disk' => config('filesystems.default'),
                             ]);
-                            // Fallback to local storage
                             $localDir = public_path('images/profile/cover_pictures');
-                            if (!file_exists($localDir)) {
+                            if (! file_exists($localDir)) {
                                 mkdir($localDir, 0777, true);
                             }
                             $coverPicture->move($localDir, $coverPictureName);
                         }
+                    } elseif ($request->filled('stock_cover')) {
+                        $pick = basename((string) $request->input('stock_cover'));
+                        if (in_array($pick, config('living_legacy.stock_covers', []), true)) {
+                            $coverPictureName = 'stock/'.$pick;
+                        }
+                    } elseif ($request->boolean('remove_cover_picture')) {
+                        $coverPictureName = '';
                     }
+
                     $profile = Profile::create([
                         'uuid' => Str::uuid(),
                         'name' => $request->name,
@@ -231,8 +266,8 @@ class ProfileController extends Controller
                         'spouse_twitter' => $request->spouse_twitter,
                         'youtube' => $request->youtube,
                         'bio' => $request->bio,
-                        'longitude' => $request->longitude,
-                        'latitude' => $request->latitude,
+                        'longitude' => $request->filled('longitude') ? $request->longitude : null,
+                        'latitude' => $request->filled('latitude') ? $request->latitude : null,
                         'link_id' => $link->id,
                         'spotify' => $request->spotify,
                         'badge' => $request->badge ?? '',
@@ -1010,10 +1045,121 @@ class ProfileController extends Controller
             ]);
         }
     }
+
+    /**
+     * Toggle which tribute tabs (except Legacy) appear in navigation.
+     */
+    public function updateTabVisibility(string $uuid, Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'family_tree' => 'nullable|boolean',
+            'gallery' => 'nullable|boolean',
+            'timeline' => 'nullable|boolean',
+            'tribute' => 'nullable|boolean',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $link = Link::where('uuid', $uuid)->firstOrFail();
+            if (! $link->profile) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Profile not found',
+                ], 404);
+            }
+            if (Auth::user()->localUser->id != $link->local_user_id) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'You are not authorize for this action',
+                ], 401);
+            }
+
+            $incoming = array_filter(
+                $request->only(array_keys(TabVisibility::DEFAULTS)),
+                fn ($v) => $v !== null
+            );
+            $merged = TabVisibility::merge($link->profile->tab_visibility ?? null);
+            foreach ($incoming as $key => $value) {
+                $merged[$key] = (bool) $value;
+            }
+
+            $link->profile->update(['tab_visibility' => $merged]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Tab visibility updated',
+                'data' => [
+                    'tab_visibility' => TabVisibility::merge($link->profile->fresh()->tab_visibility),
+                ],
+            ]);
+        } catch (\Throwable $th) {
+            \Log::error('updateTabVisibility: '.$th->getMessage(), [
+                'exception' => $th,
+            ]);
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong',
+            ], 500);
+        }
+    }
+
     private function deletePicture($pictureWithCompletePath)
     {
         if (file_exists($pictureWithCompletePath)) {
             unlink($pictureWithCompletePath);
         }
+    }
+
+    /**
+     * @param  string  $stored  Filename stored in DB, or empty, or e.g. "stock/foo.svg" (no-op for stock)
+     */
+    private function deleteStoredProfileFile(?string $stored): void
+    {
+        if ($stored === null || $stored === '') {
+            return;
+        }
+        if (str_starts_with($stored, 'stock/')) {
+            return;
+        }
+        $relative = 'images/profile/profile_pictures/'.$stored;
+        try {
+            $disk = config('filesystems.default');
+            if (Storage::disk($disk)->exists($relative)) {
+                Storage::disk($disk)->delete($relative);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('deleteStoredProfileFile: disk delete failed', ['e' => $e->getMessage()]);
+        }
+        $this->deletePicture(public_path('images/profile/profile_pictures/'.$stored));
+    }
+
+    /**
+     * @param  string  $stored  Filename stored in DB, or empty, or stock/* (no-op for stock)
+     */
+    private function deleteStoredCoverFile(?string $stored): void
+    {
+        if ($stored === null || $stored === '') {
+            return;
+        }
+        if (str_starts_with($stored, 'stock/')) {
+            return;
+        }
+        $relative = 'images/profile/cover_pictures/'.$stored;
+        try {
+            $disk = config('filesystems.default');
+            if (Storage::disk($disk)->exists($relative)) {
+                Storage::disk($disk)->delete($relative);
+            }
+        } catch (\Throwable $e) {
+            \Log::warning('deleteStoredCoverFile: disk delete failed', ['e' => $e->getMessage()]);
+        }
+        $this->deletePicture(public_path('images/profile/cover_pictures/'.$stored));
     }
 }

@@ -16,6 +16,7 @@ import {
     Tribute,
 } from "../pages";
 import { AppLayout } from "../Layout";
+import { TabRouteGuard } from "../components/TabRouteGuard";
 
 export const AppRoutes = () => {
     return (
@@ -35,10 +36,38 @@ export const AppRoutes = () => {
             {/* Full Version Routes - With AppLayout */}
             <Route element={<AppLayout />}>
                 <Route index path="/:id/legacy" element={<Bio />} />
-                <Route path="/:id/gallery" element={<Photos />} />
-                <Route path="/:id/timeline" element={<Timeline />} />
-                <Route path="/:id/tribute" element={<Tribute />} />
-                <Route path="/:id/family-tree" element={<FamilyTree />} />
+                <Route
+                    path="/:id/gallery"
+                    element={
+                        <TabRouteGuard tabKey="gallery">
+                            <Photos />
+                        </TabRouteGuard>
+                    }
+                />
+                <Route
+                    path="/:id/timeline"
+                    element={
+                        <TabRouteGuard tabKey="timeline">
+                            <Timeline />
+                        </TabRouteGuard>
+                    }
+                />
+                <Route
+                    path="/:id/tribute"
+                    element={
+                        <TabRouteGuard tabKey="tribute">
+                            <Tribute />
+                        </TabRouteGuard>
+                    }
+                />
+                <Route
+                    path="/:id/family-tree"
+                    element={
+                        <TabRouteGuard tabKey="family_tree">
+                            <FamilyTree />
+                        </TabRouteGuard>
+                    }
+                />
                 <Route path="/:id/settings" element={<Settings />} />
             </Route>
             <Route path="/*" element={<NotFound />} />

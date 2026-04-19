@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+use App\Support\ProfileMediaUrls;
+use App\Support\TabVisibility;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class LinkResource extends JsonResource
 {
@@ -40,23 +41,20 @@ class LinkResource extends JsonResource
             $data['badge'] = $this->profile->badge ?? '';
             $data['spouse_badge'] = $this->profile->spouse_badge ?? '';
             $data['dark_theme'] = $this->profile->dark_theme ?? true;
+            $data['tab_visibility'] = TabVisibility::merge($this->profile->tab_visibility ?? null);
             $data['relations'] = RelationResource::collection($this->profile->relations ?? []);
             // 🎄 Add version_type to the Details section
             $data['version_type'] = $this->version_type ?? 'full';
             if ($this->profile && $this->profile->profile_picture) {
-                try {
-                    $data['profile_picture'] = Storage::disk(config('filesystems.default'))->url('images/profile/profile_pictures/'.$this->profile->profile_picture);
-                } catch (\Exception $e) {
-                    \Log::warning('LinkResource: Failed to generate S3 URL for profile_picture', ['error' => $e->getMessage()]);
-                    $data['profile_picture'] = asset('images/profile/profile_pictures/'.$this->profile->profile_picture);
+                $url = ProfileMediaUrls::profilePicture($this->profile->profile_picture);
+                if ($url) {
+                    $data['profile_picture'] = $url;
                 }
             }
             if ($this->profile && $this->profile->cover_picture) {
-                try {
-                    $data['cover_picture'] = Storage::disk(config('filesystems.default'))->url('images/profile/cover_pictures/'.$this->profile->cover_picture);
-                } catch (\Exception $e) {
-                    \Log::warning('LinkResource: Failed to generate S3 URL for cover_picture', ['error' => $e->getMessage()]);
-                    $data['cover_picture'] = asset('images/profile/cover_pictures/'.$this->profile->cover_picture);
+                $url = ProfileMediaUrls::coverPicture($this->profile->cover_picture);
+                if ($url) {
+                    $data['cover_picture'] = $url;
                 }
             }
         }

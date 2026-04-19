@@ -1,0 +1,3 @@
+# Netlify SPA fallback - serve index.html for all routes
+# Fixes 404 on mobile when visiting /uuid/legacy etc.
+/*    /index.html   200

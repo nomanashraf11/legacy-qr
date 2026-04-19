@@ -30,11 +30,13 @@ class Profile extends Model
         'link_id',
         'badge',
         'spouse_badge',
-        'dark_theme'
+        'dark_theme',
+        'tab_visibility',
     ];
 
     protected $casts = [
-        'dark_theme' => 'boolean'
+        'dark_theme' => 'boolean',
+        'tab_visibility' => 'array',
     ];
 
     public function photos()
