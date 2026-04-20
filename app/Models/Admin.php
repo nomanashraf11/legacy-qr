@@ -9,6 +9,7 @@ class Admin extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'user_id',
         'purchase',
         'qr_price',
         'min_quantity',

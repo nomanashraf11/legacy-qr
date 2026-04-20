@@ -169,10 +169,7 @@ class QrCodeController extends Controller
                         return '<a target="_blank" href="'.env('CLIENT_URL').'/'.$row->uuid.'" class="">'.env('CLIENT_URL').'/'.$row->uuid.'</a>';
                     })
                     ->addColumn('batch', function ($row) {
-                        if ($row->batch->number) {
-                            return $row->batch->number;
-                        }
-                        return null;
+                        return $row->batch?->number ?? '—';
                     })
                     ->addColumn('action', function ($row) {
                         return '<a title="Download QR Codes" href="'.route('downloadSvg', $row->image).'"><i class="ri-download-2-line fs-3"></i></a>';
@@ -380,7 +377,7 @@ class QrCodeController extends Controller
                             : '-';
                     })
                     ->addColumn('user', function ($row) {
-                        return $row->localUser->user->email;
+                        return $row->localUser?->user?->email ?? '—';
                     })
                     ->addColumn('version_type', function ($row) {
                         $badgeClass = $row->version_type === 'christmas' ? 'bg-success' : 'bg-primary';
@@ -392,10 +389,7 @@ class QrCodeController extends Controller
                         return '<a title="View Details" href="'.$view.'"><i class="mdi mdi-eye fs-3"></i></a>';
                     })
                     ->addColumn('batch', function ($row) {
-                        if ($row->batch->number) {
-                            return $row->batch->number;
-                        }
-                        return null;
+                        return $row->batch?->number ?? '—';
                     })
                     ->addColumn('link', function ($row) {
                         return '<a target="_blank" href="'.env('CLIENT_URL').'/'.$row->uuid.'" class="">'.env('CLIENT_URL').'/'.$row->uuid.'</a>';
