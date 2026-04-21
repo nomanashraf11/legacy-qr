@@ -357,7 +357,7 @@
                                                             <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                                             <div align="left">
                                                                 <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="" style="height:52px; v-text-anchor:middle; width:205px;" arcsize="2%"  stroke="f" fillcolor="#0f66a9"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
-                                                                <a href="{{ env('APP_URL') }}" target="_blank"
+                                                                <a href="{{ config('app.url') }}" target="_blank"
                                                                     class="v-button"
                                                                     style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF !important; background: linear-gradient(135deg, #0f66a9 0%, #1a7fc9 100%); border-radius: 1px;-webkit-border-radius: 1px; -moz-border-radius: 1px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
                                                                     <span

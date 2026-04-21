@@ -25,6 +25,22 @@ use App\Exports\LinksExport;
 
 class QrCodeController extends Controller
 {
+    /**
+     * Absolute SPA base URL embedded in QR codes (scheme + host, no trailing slash).
+     * Requires CLIENT_URL in .env and a fresh config cache.
+     */
+    protected function clientProfileBaseUrl(): string
+    {
+        $base = rtrim((string) config('app.client_url'), '/');
+        if ($base !== '') {
+            return $base;
+        }
+
+        throw new \RuntimeException(
+            'CLIENT_URL is not set or is empty. Add CLIENT_URL=https://your-spa-host to .env, then run: php artisan config:clear && php artisan config:cache'
+        );
+    }
+
     // public function index(Request $request)
     // {
     //     try {
@@ -166,7 +182,13 @@ class QrCodeController extends Controller
                         return '<span class="badge '.$badgeClass.'">'.$label.'</span>';
                     })
                     ->addColumn('link', function ($row) {
-                        return '<a target="_blank" href="'.config('app.client_url').'/'.$row->uuid.'" class="">'.config('app.client_url').'/'.$row->uuid.'</a>';
+                        try {
+                            $base = $this->clientProfileBaseUrl();
+                        } catch (\RuntimeException $e) {
+                            return '<span class="text-danger" title="'.e($e->getMessage()).'">(configure CLIENT_URL)</span>';
+                        }
+
+                        return '<a target="_blank" href="'.$base.'/'.$row->uuid.'" class="">'.$base.'/'.$row->uuid.'</a>';
                     })
                     ->addColumn('batch', function ($row) {
                         return $row->batch?->number ?? '—';
@@ -185,6 +207,15 @@ class QrCodeController extends Controller
     }
     public function store(AddLinkRequest $request)
     {
+        try {
+            $clientBase = $this->clientProfileBaseUrl();
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
         try {
             DB::beginTransaction();
             $latestBatch = Batch::latest()->first();
@@ -210,7 +241,7 @@ class QrCodeController extends Controller
                     'batch_id' => $newBatch->id,
                     'version_type' => $request->version_type ?? 'full'
                 ]);
-                $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate(config('app.client_url').'/'.$link->uuid, public_path('images/qr_codes/'.$link->uuid.'.svg'));
+                $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate($clientBase.'/'.$link->uuid, public_path('images/qr_codes/'.$link->uuid.'.svg'));
 
                 $link->update([
                     'id' => $link->id,
@@ -237,6 +268,12 @@ class QrCodeController extends Controller
     public function availableExport($uuid)
     {
         try {
+            $clientBase = $this->clientProfileBaseUrl();
+        } catch (\RuntimeException $e) {
+            abort(422, $e->getMessage());
+        }
+
+        try {
             $batch = Batch::where('uuid', $uuid)->first();
             $links = $batch->availableLinks();
             $spreadsheet = new Spreadsheet();
@@ -250,7 +287,7 @@ class QrCodeController extends Controller
 
             $row = 2;
             foreach ($links as $link) {
-                $sheet->setCellValue('A'.$row, config('app.client_url').'/'.$link['uuid']);
+                $sheet->setCellValue('A'.$row, $clientBase.'/'.$link['uuid']);
                 $sheet->setCellValue('B'.$row, $link['image']);
                 $row++;
             }
@@ -273,6 +310,12 @@ class QrCodeController extends Controller
     public function export($uuid)
     {
         try {
+            $clientBase = $this->clientProfileBaseUrl();
+        } catch (\RuntimeException $e) {
+            abort(422, $e->getMessage());
+        }
+
+        try {
             $batch = Batch::where('uuid', $uuid)->first();
             $links = $batch->links;
             $spreadsheet = new Spreadsheet();
@@ -286,7 +329,7 @@ class QrCodeController extends Controller
 
             $row = 2;
             foreach ($links as $link) {
-                $sheet->setCellValue('A'.$row, config('app.client_url').'/'.$link['uuid']);
+                $sheet->setCellValue('A'.$row, $clientBase.'/'.$link['uuid']);
                 $sheet->setCellValue('B'.$row, $link['image']);
                 $row++;
             }
@@ -308,7 +351,7 @@ class QrCodeController extends Controller
     }
     private function generateQrCodeWithLogo($uuid)
     {
-        $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate(config('app.client_url').'/'.$uuid);
+        $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate($this->clientProfileBaseUrl().'/'.$uuid);
 
         $dom = new \DOMDocument();
         $dom->loadXML($svgCode);
@@ -392,7 +435,13 @@ class QrCodeController extends Controller
                         return $row->batch?->number ?? '—';
                     })
                     ->addColumn('link', function ($row) {
-                        return '<a target="_blank" href="'.config('app.client_url').'/'.$row->uuid.'" class="">'.config('app.client_url').'/'.$row->uuid.'</a>';
+                        try {
+                            $base = $this->clientProfileBaseUrl();
+                        } catch (\RuntimeException $e) {
+                            return '<span class="text-danger" title="'.e($e->getMessage()).'">(configure CLIENT_URL)</span>';
+                        }
+
+                        return '<a target="_blank" href="'.$base.'/'.$row->uuid.'" class="">'.$base.'/'.$row->uuid.'</a>';
                     })
 
                     ->rawColumns(['batch', 'action', 'user', 'link', 'created_at', 'version_type'])

@@ -83,8 +83,8 @@
                     </p>
                 </li>
                 <li>
-                    <p><strong>Website</strong> refers to Living Legacy, accessible from <a href="{{ env('APP_URL') }}"
-                            rel="external nofollow noopener" target="_blank">{{ env('APP_URL') }}</a></p>
+                    <p><strong>Website</strong> refers to Living Legacy, accessible from <a href="{{ config('app.url') }}"
+                            rel="external nofollow noopener" target="_blank">{{ config('app.url') }}</a></p>
                 </li>
                 <li>
                     <p><strong>You</strong> means the individual accessing or using the Service, or the company, or other

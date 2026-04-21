@@ -974,7 +974,9 @@ class ProfileController extends Controller
     public function shareProfile($link)
     {
         try {
-            $link = env('APP_URL').'/'.$link;
+            $base = rtrim((string) config('app.client_url'), '/')
+                ?: rtrim((string) config('app.url'), '/');
+            $link = $base.'/'.$link;
             return response()->json([
                 'status' => 200,
                 'data' => $link,

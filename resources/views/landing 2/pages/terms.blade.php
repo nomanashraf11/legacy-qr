@@ -21,7 +21,7 @@
             <p>Welcome to Living Legacy!</p>
 
             <p>These terms and conditions outline the rules and regulations for the use of Living Legacy's Website, located
-                at <a href="{{ env('APP_URL') }}" target="_blank">{{ env('APP_URL') }}</a>.</p>
+                at <a href="{{ config('app.url') }}" target="_blank">{{ config('app.url') }}</a>.</p>
 
             <p>By accessing this website we assume you accept these terms and conditions. Do not continue to use Living
                 Legacy if you do not agree to take all of the terms and conditions stated on this page.</p>
