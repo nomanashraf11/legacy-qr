@@ -372,7 +372,7 @@
                                                                         the link below to setup your account. You can
                                                                         access this link from mobile or desktop browser.
                                                                         <a style="color: #FFFFFF"
-                                                                            href="{{ env('CLIENT_URL') . '/' . $data['qr_code'] }}">{{ env('CLIENT_URL') . '/' . $data['qr_code'] }}</a>
+                                                                            href="{{ config('app.client_url') . '/' . $data['qr_code'] }}">{{ config('app.client_url') . '/' . $data['qr_code'] }}</a>
                                                                     </span></p>
                                                             </div>
                                                         </td>

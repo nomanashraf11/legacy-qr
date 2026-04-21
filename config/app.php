@@ -71,6 +71,18 @@ return [
 
     'main_site_url' => env('MAIN_SITE_URL', 'https://livinglegacyqr.com'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | SPA / frontend URL (Vite app — login, profiles)
+    |--------------------------------------------------------------------------
+    |
+    | Read via config('app.client_url'), not env('CLIENT_URL') in app code, so
+    | values work correctly when configuration is cached (php artisan config:cache).
+    |
+    */
+
+    'client_url' => rtrim((string) env('CLIENT_URL', ''), '/'),
+
     'mail_logo_url' => \App\Constants\MailConstants::LOGO_URL,
 
     /*

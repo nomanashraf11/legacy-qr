@@ -30,7 +30,7 @@ class VerificationController extends Controller
 
     public function sendOTP($email, $otp)
     {
-        $url = env('CLIENT_URL') . '/verify-email?email=' . $email . '&otp=' . $otp;
+        $url = rtrim((string) config('app.client_url'), '/') . '/verify-email?email=' . $email . '&otp=' . $otp;
         Mail::to($email)->send(new VerificationEmail($url));  // Create a Mailable for this
     }
 

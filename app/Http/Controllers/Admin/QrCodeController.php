@@ -45,7 +45,7 @@ class QrCodeController extends Controller
     //                     return  '<span class="badge bg-danger">Sold out</span>';
     //                 })
     //                 ->addColumn('link', function ($row) {
-    //                     return '<a target="_blank" href="' . env('CLIENT_URL') . '/' . $row->uuid . '" class="">' . env('CLIENT_URL') . '/' . $row->uuid . '</a>';
+    //                     return '<a target="_blank" href="' . config('app.client_url') . '/' . $row->uuid . '" class="">' . config('app.client_url') . '/' . $row->uuid . '</a>';
     //                 })
     //                 ->addColumn('batch', function ($row) {
     //                     if ($row->batch->number) {
@@ -166,7 +166,7 @@ class QrCodeController extends Controller
                         return '<span class="badge '.$badgeClass.'">'.$label.'</span>';
                     })
                     ->addColumn('link', function ($row) {
-                        return '<a target="_blank" href="'.env('CLIENT_URL').'/'.$row->uuid.'" class="">'.env('CLIENT_URL').'/'.$row->uuid.'</a>';
+                        return '<a target="_blank" href="'.config('app.client_url').'/'.$row->uuid.'" class="">'.config('app.client_url').'/'.$row->uuid.'</a>';
                     })
                     ->addColumn('batch', function ($row) {
                         return $row->batch?->number ?? '—';
@@ -210,7 +210,7 @@ class QrCodeController extends Controller
                     'batch_id' => $newBatch->id,
                     'version_type' => $request->version_type ?? 'full'
                 ]);
-                $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate(env('CLIENT_URL').'/'.$link->uuid, public_path('images/qr_codes/'.$link->uuid.'.svg'));
+                $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate(config('app.client_url').'/'.$link->uuid, public_path('images/qr_codes/'.$link->uuid.'.svg'));
 
                 $link->update([
                     'id' => $link->id,
@@ -250,7 +250,7 @@ class QrCodeController extends Controller
 
             $row = 2;
             foreach ($links as $link) {
-                $sheet->setCellValue('A'.$row, env('CLIENT_URL').'/'.$link['uuid']);
+                $sheet->setCellValue('A'.$row, config('app.client_url').'/'.$link['uuid']);
                 $sheet->setCellValue('B'.$row, $link['image']);
                 $row++;
             }
@@ -286,7 +286,7 @@ class QrCodeController extends Controller
 
             $row = 2;
             foreach ($links as $link) {
-                $sheet->setCellValue('A'.$row, env('CLIENT_URL').'/'.$link['uuid']);
+                $sheet->setCellValue('A'.$row, config('app.client_url').'/'.$link['uuid']);
                 $sheet->setCellValue('B'.$row, $link['image']);
                 $row++;
             }
@@ -308,7 +308,7 @@ class QrCodeController extends Controller
     }
     private function generateQrCodeWithLogo($uuid)
     {
-        $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate(env('CLIENT_URL').'/'.$uuid);
+        $svgCode = QrCode::size(500)->errorCorrection('H')->style('round')->generate(config('app.client_url').'/'.$uuid);
 
         $dom = new \DOMDocument();
         $dom->loadXML($svgCode);
@@ -392,7 +392,7 @@ class QrCodeController extends Controller
                         return $row->batch?->number ?? '—';
                     })
                     ->addColumn('link', function ($row) {
-                        return '<a target="_blank" href="'.env('CLIENT_URL').'/'.$row->uuid.'" class="">'.env('CLIENT_URL').'/'.$row->uuid.'</a>';
+                        return '<a target="_blank" href="'.config('app.client_url').'/'.$row->uuid.'" class="">'.config('app.client_url').'/'.$row->uuid.'</a>';
                     })
 
                     ->rawColumns(['batch', 'action', 'user', 'link', 'created_at', 'version_type'])

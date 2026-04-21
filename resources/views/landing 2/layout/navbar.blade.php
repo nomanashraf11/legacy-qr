@@ -11,7 +11,7 @@
             <!-- Navbar Button -->
             <ul class="list-none menu-social mb-0">
                 <li class="inline">
-                    <a href="{{ env('CLIENT_URL') }}"
+                    <a href="{{ config('app.client_url') }}"
                         class="h-8 px-4 text-[12px] tracking-wider inline-flex items-center justify-center font-medium rounded-md bg-teal-500 text-white uppercase">Login</a>
                 </li>
             </ul>

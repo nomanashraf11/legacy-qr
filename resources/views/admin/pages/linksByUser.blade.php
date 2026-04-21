@@ -32,8 +32,8 @@
                                         <tr>
                                             <td>{{ $qrCode->uuid }}</td>
                                             <td>{{ $qrCode->profile->name ?? '------' }}</td>
-                                            <td><a href="{{ env('CLIENT_URL') . '/' . $qrCode->uuid }}" target="_blank">
-                                                    {{ env('CLIENT_URL') . '/' . $qrCode->uuid }}</a></td>
+                                            <td><a href="{{ config('app.client_url') . '/' . $qrCode->uuid }}" target="_blank">
+                                                    {{ config('app.client_url') . '/' . $qrCode->uuid }}</a></td>
                                         </tr>
                                     @endforeach
                                 </tbody>
